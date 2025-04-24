@@ -6,7 +6,9 @@
 
 3. Change the settings in "setup.file" to desire and run the command "./testMain setup.file 10 > out.txt" for the total number of events of muons and ouput into file out.txt.
 
-4. Compile the "cry_muon_converter" from a excutable to convert CRY output to .hepmc format
+4. Compile the "cry_muon_converter" in the /test/ folder, the excutable to convert CRY output to .hepmc format
+
+'''source ../setup.sh'''
 
 ```source /home/ucr/root_install/bin/thisroot.sh```
 
