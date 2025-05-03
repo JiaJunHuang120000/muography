@@ -1,8 +1,8 @@
 cd cry_v1.7/test/
-./testMain setup.file 10000 > output.txt
-./cry_muon_converter output.txt output.hepmc
-rm output.txt
+./testMain ../../setup.file 9999 > output.txt
+
 cd ../..
-mkdir hepmc
-mv cry_v1.7/test/output.hepmc hepmc/
- 
+mkdir -p hepmc
+./cry_muon_converter cry_v1.7/test/output.txt hepmc/output.hepmc
+rm cry_v1.7/test/output.txt
+
