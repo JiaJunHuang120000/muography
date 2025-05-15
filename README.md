@@ -1,6 +1,31 @@
+### Pipe line for generating CRY simulated muons for detectors
+
+## Compiling this github
+Run the code to clone the github for compiling
+``` https://github.com/JiaJunHuang120000/muography.git ```
+
+Run the following scripts after cloning the {muography} github repository
+
+```
+bash compile.sh
+bash gen_cry.sh
+curl -L https://github.com/eic/eic-shell/raw/main/install.sh | bash
+./eic-shell
+source setup_env.sh
+bash build.sh
+ddsim --compactFile metal.xml --outputFile data/test.root --inputFile hepmc/output.hepmc --numberOfEvents 5
+
+wget https://nuclear.llnl.gov/simulation/cry_v1.7.tar.gz
+tar -xvzf cry_v1.7.tar.gz
+rm cry_v1.7.tar.gz
+cd cry_v1.7/
+make
+```
+
+
 ## Instruction on how to run CRY library for generating cosmic muon and filtering for detector level muons:
 
-1. Install the package from website https://nuclear.llnl.gov/simulation/ if current version is not working correctly.
+1. Install the CRY package from website https://nuclear.llnl.gov/simulation/ if current version is not working correctly.
 
 2. Run "make" in the top repository to compile for testMain excutable in /test/ folder.
 
