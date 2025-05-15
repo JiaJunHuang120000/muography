@@ -2,7 +2,9 @@
 
 ## Compiling this github
 Run the code to clone the github for compiling
-``` https://github.com/JiaJunHuang120000/muography.git ```
+``` 
+git clone https://github.com/JiaJunHuang120000/muography.git
+```
 
 Run the following scripts after cloning the {muography} github repository
 
@@ -23,7 +25,7 @@ make
 ```
 
 
-## Instruction on how to run CRY library for generating cosmic muon and filtering for detector level muons:
+## Standalone instruction on how to run CRY library for generating cosmic muon and filtering for detector level muons:
 
 1. Install the CRY package from website https://nuclear.llnl.gov/simulation/ if current version is not working correctly.
 
