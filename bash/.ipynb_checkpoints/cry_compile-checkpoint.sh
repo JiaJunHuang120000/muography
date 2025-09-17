@@ -7,4 +7,4 @@ cd ..
 
 export LD_LIBRARY_PATH=$HOME/tmp/muography/hepmc3-install/lib:$LD_LIBRARY_PATH
 HEPMC3_INSTALL=$HOME/tmp/muography/hepmc3-install
-g++ -o back_project_single cpp/back_project_single.cxx -I$HEPMC3_INSTALL/include -L$HEPMC3_INSTALL/lib -lHepMC3     `root-config --cflags --libs` -lEG -lGeom
+g++ -I. -I../src -o back_project_single cpp/back_project_single.cxx  -L../lib -lCRY  -I$HEPMC3_INSTALL/include -L$HEPMC3_INSTALL/lib -lHepMC3 `root-config --cflags --libs` -lEG -lGeom
