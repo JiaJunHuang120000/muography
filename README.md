@@ -1,4 +1,9 @@
-### Pipe line for generating CRY simulated muons for detectors
+### Pipe line for generating CRY simulated muons for detectors and DD4HEP Simulation
+
+## Pre-Requisite
+- CRY version 1.7
+- HepMC3-3.2.6
+- eic-shell Jul 28 2025
 
 ## Compiling this github
 Run the code to clone the github for compiling
@@ -9,19 +14,14 @@ git clone https://github.com/JiaJunHuang120000/muography.git
 Run the following scripts after cloning the {muography} github repository
 
 ```
-bash compile.sh
-bash gen_cry.sh
+bash bash/hepmc_compile.sh
+bash bash/cry_compile.sh
+bash bash/gen_cry.sh
 curl -L https://github.com/eic/eic-shell/raw/main/install.sh | bash
 ./eic-shell
 source setup_env.sh
 bash build.sh
 ddsim --compactFile metal.xml --outputFile data/test.root --inputFile hepmc/output.hepmc --numberOfEvents 5
-
-wget https://nuclear.llnl.gov/simulation/cry_v1.7.tar.gz
-tar -xvzf cry_v1.7.tar.gz
-rm cry_v1.7.tar.gz
-cd cry_v1.7/
-make
 ```
 
 
@@ -31,24 +31,20 @@ make
 
 2. Run "make" in the top repository to compile for testMain excutable in /test/ folder.
 
-3. Change the settings in "setup.file" to desire and run the command "./testMain setup.file 10 > out.txt" for the total number of events of muons and ouput into file out.txt.
+3. Change the settings in "setup.file" to desire and run the command "./testMain $HOME/muography/setup.file 10 > out.txt" for the total number of events of muons and ouput into file out.txt.
 
-4. Compile the "cry_muon_converter" in the /test/ folder, the excutable to convert CRY output to .hepmc format
+4. Compile the "back_project_single.cxx" in the /cpp/ folder, the excutable to convert CRY output to .hepmc format
 
-'''source ../setup.sh'''
+```source $HOME/root_install/bin/thisroot.sh```
 
-```source /home/ucr/root_install/bin/thisroot.sh```
+```export LD_LIBRARY_PATH=$HOME/muography/hepmc3-install/lib:$LD_LIBRARY_PATH```
 
-```export LD_LIBRARY_PATH=$HOME/hepmc3-install/lib:$LD_LIBRARY_PATH```
+```HEPMC3_INSTALL=$HOME/muography/hepmc3-install```
 
-```HEPMC3_INSTALL=/home/jiajun/hepmc3-install```
+```g++ -I. -I../src -o back_project_single cpp/back_project_single.cxx  -L../lib -lCRY  -I$HEPMC3_INSTALL/include -L$HEPMC3_INSTALL/lib -lHepMC3 `root-config --cflags --libs` -lEG -lGeom```
 
-```g++ -I. -I../src -o cry_muon_converter cry_muon_converter.cxx  -L../lib -lCRY  -I$HEPMC3_INSTALL/include -L$HEPMC3_INSTALL/lib -lHepMC3 `root-config --cflags --libs` -lEG -lGeom```
+5. Run the command "./back_project_single <input_file.txt> <output_file.hepmc> <muon_generation_height> <detector_position_x> <detector_position_y> <detector_position_z> <z_offset> <E_cut>" to obtain the file.
 
-5. Run the command "./cry_muon_converter out.txt out.hepmc" to obtain the file.
+6. Everytime you change the parameter in the converter, you will have to rerun the compiling code for changes to be updated.
 
-6. If you would like the Y/Z coordinate exchanged, use the zdc converter with the changes on the compiling code accordingly.
-
-7. Everytime you change the parameter in the converter, you will have to rerun the compiling code for changes to be updated.
-
-8. The converter changes the plane where the muons will be generated and set a detection plane with user defined area for muon detection.
+7. The converter changes the plane where the muons will be generated and set a detection plane with user defined area for muon detection.
