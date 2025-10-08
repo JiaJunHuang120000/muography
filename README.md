@@ -3,7 +3,10 @@
 ## Pre-Requisite
 - CRY version 1.7
 - HepMC3-3.2.6
-- eic-shell Jul 28 2025
+- DD4HEP v01-32-01
+
+## Standalone Proceed for DD4HEP Installation
+The current guide of DD4HEP is install using cvmfs, following the guidline from https://docs.google.com/document/d/1XPHIn0BTb-bTih-vyRavrLSQryHR4qhdpqHkqsGROx4/edit?tab=t.0 . This guide also contains instruction on installing DD4HEP locally.
 
 ## Compiling this github
 Run the code to clone the github for compiling
@@ -17,8 +20,8 @@ Run the following scripts after cloning the {muography} github repository
 bash bash/hepmc_compile.sh
 bash bash/cry_compile.sh
 bash bash/gen_cry.sh
-curl -L https://github.com/eic/eic-shell/raw/main/install.sh | bash
-./eic-shell
+bash bash/dd4hep_compile.sh
+
 source setup_env.sh
 bash build.sh
 ddsim --compactFile metal.xml --outputFile data/test.root --inputFile hepmc/output.hepmc --numberOfEvents 5 --steeringFile steering.py
