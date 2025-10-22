@@ -1,9 +1,11 @@
 ### Pipe line for generating CRY simulated muons for detectors and DD4HEP Simulation
 
 ## Pre-Requisite
+- Ubuntu 22.04.5 LTS
 - CRY version 1.7
 - HepMC3-3.2.6
 - DD4HEP v01-32-01
+- ROOT Version: 6.32.02
 
 ## Standalone Proceed for DD4HEP Installation
 The current guide of DD4HEP is install using cvmfs, following the guidline from https://docs.google.com/document/d/1XPHIn0BTb-bTih-vyRavrLSQryHR4qhdpqHkqsGROx4/edit?tab=t.0 . This guide also contains instruction on installing DD4HEP locally.
@@ -12,6 +14,7 @@ The current guide of DD4HEP is install using cvmfs, following the guidline from 
 Run the code to clone the github for compiling
 ``` 
 git clone https://github.com/JiaJunHuang120000/muography.git
+cd muography/
 ```
 
 Run the following scripts after cloning the {muography} github repository
