@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.3 FATAL_ERROR)
 
-PROJECT(zdc_prototype
+PROJECT(muography
   LANGUAGES CXX
   )
 
@@ -23,7 +23,7 @@ install(DIRECTORY src
     )
 
 #-----------------------------------------------------------------------------------
-file(GLOB ZDC_PROTOTYPE_FILES "*.xml")
-INSTALL(FILES ${ZDC_PROTOTYPE_FILES}
+file(GLOB MUOGRAPHY "*.xml")
+INSTALL(FILES ${MUOGRAPHY}
 	DESTINATION share/${PROJECT_NAME}
 	)
