@@ -17,6 +17,7 @@ git clone https://github.com/JiaJunHuang120000/muography.git
 Run the following scripts after cloning the {muography} github repository
 
 ```
+source /cvmfs/sft.cern.ch/lcg/views/LCG_106/x86_64-ubuntu2204-gcc11-opt/setup.sh
 bash bash/hepmc_compile.sh
 bash bash/cry_compile.sh
 bash bash/gen_cry.sh
