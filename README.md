@@ -25,7 +25,8 @@ bash bash/dd4hep_compile.sh
 
 source setup_env.sh
 bash build.sh
- ddsim --compactFile xml/square_2x4x8.xml       --outputFile data/test.root       --inputFile hepmc/output.hepmc       --numberOfEvents 5       --steeringFile steering.py
+mkdir data
+ddsim --compactFile xml/square_2x4x8.xml       --outputFile data/test.root       --inputFile hepmc/output.hepmc       --numberOfEvents 5       --steeringFile steering.py
 ```
 
 
