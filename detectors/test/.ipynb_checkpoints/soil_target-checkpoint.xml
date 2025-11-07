@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='utf-8'?>
+<lccdd><info name="ZDC_prototype.xml" title="SiPM-on-Tile Zero-Degree Calorimeter Hcal Prototype, Fe/Sc" author="@rymilton" url="https://github.com/rymilton" status="development" version="1.0"><comment /></info>
+
+
+<std_conditions type="NTP" />
+
+<includes>
+    <gdmlFile ref="${DD4hepINSTALL}/DDDetectors/compact/elements.xml" />
+    <gdmlFile ref="${DETECTOR_PATH}/compact/materials.xml" />
+</includes>
+
+  <display>
+    <include ref="${DETECTOR_PATH}/compact/colors.xml" />
+  </display>
+
+  <define>
+    <constant name="Pi" value="3.14159265359" />
+    <constant name="mil" value="0.0254*mm" />
+    <constant name="inch" value="2.54*cm" />
+  </define>
+
+<detectors><detector id="2000" name="RockWithCubeCutout" type="RockWithCubeCutout" vis="AnlGray" material="Rock">
+  <dimensions x="world_dx" y="world_dy" z="world_dz" />
+  <position x="0" y="0" z="-world_dz/2" />
+
+  <cube>
+    <dimensions x="0.5*m" y="0.5*m" z="1*m" />
+    <position x="Detector_x_pos" y="Detector_y_pos" z="Detector_z_pos" />
+  </cube>
+
+  <sphere>
+    <dimensions r="20*m" />
+    <position x="0*m" y="0*m" z="-20*m" />
+  </sphere>
+</detector></detectors></lccdd>
