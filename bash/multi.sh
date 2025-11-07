@@ -1,4 +1,4 @@
-start=$(date +%s)
+cd start=$(date +%s)
 iteration=3
 numEvent=(100000 7000000 30000000 30000000)
 target_height=10
