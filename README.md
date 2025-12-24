@@ -59,7 +59,7 @@ ddsim --compactFile xml/square_2x4x8.xml       --outputFile data/test.root      
 
 ### Parameters for CRY
 
-1. To change the area of muons hit at sea level, change the [subboxLength] in [setup.fil] (units in m). This will create a 2d box of length^2.
+1. To change the area of muons hit at sea level, change the [subboxLength] in [setup.file] (units in m). This will create a 2d box of length^2.
 3. To change the other parameters of the muon generation, you will need to either change the parameters inside [bash/gen_cry.sh] or in the terminal where you manualy enter the command in the above section.
 4. For the number of events taken from raw CRY output, change line 2 and the number [100] to desired number of events you need. You will need higher events than needed if you are applying a energy cut later, it is suggested you generate a large pool of events as a base events such you can grab later on.
 5. In line 6 is the rest of the parameters you can change in the process of CRY to hepmc, following the variables <input_file.txt> <output_file.hepmc> <muon_generation_height> <detector_position_x> <detector_position_y> <detector_position_z> <z_offset> <E_cut> <number_of_events>.
