@@ -29,7 +29,7 @@ bash bash/dd4hep_compile.sh
 source setup_env.sh
 bash build.sh
 mkdir data
-ddsim --compactFile xml/square_2x4x8.xml       --outputFile data/test.root       --inputFile hepmc/output.hepmc       --numberOfEvents 5       --steeringFile steering.py
+ddsim --compactFile xml/square_2x4x8.xml       --outputFile data/test.root       --inputFiles hepmc/output.hepmc       --numberOfEvents 5       --steeringFile steering.py
 ```
 
 
@@ -41,7 +41,7 @@ ddsim --compactFile xml/square_2x4x8.xml       --outputFile data/test.root      
 
 3. Change the settings in "setup.file" to desire and run the command "./testMain $HOME/muography/setup.file 10 > out.txt" for the total number of events of muons and ouput into file out.txt.
 
-4. Compile the "back_project_single.cxx" in the /cpp/ folder, the excutable to convert CRY output to .hepmc format
+4. Compile the "remote.cxx" in the /cpp/ folder, the excutable to convert CRY output to .hepmc format
 
 ```source $HOME/root_install/bin/thisroot.sh```
 
@@ -49,9 +49,9 @@ ddsim --compactFile xml/square_2x4x8.xml       --outputFile data/test.root      
 
 ```HEPMC3_INSTALL=$HOME/muography/hepmc3-install```
 
-```g++ -I. -I../src -o back_project_single cpp/back_project_single.cxx  -L../lib -lCRY  -I$HEPMC3_INSTALL/include -L$HEPMC3_INSTALL/lib -lHepMC3 `root-config --cflags --libs` -lEG -lGeom```
+```g++ -I. -I../src -o remote cpp/remote.cxx  -L../lib -lCRY  -I$HEPMC3_INSTALL/include -L$HEPMC3_INSTALL/lib -lHepMC3 `root-config --cflags --libs` -lEG -lGeom```
 
-5. Run the command "./back_project_single <input_file.txt> <output_file.hepmc> <muon_generation_height> <detector_position_x> <detector_position_y> <detector_position_z> <z_offset> <E_cut>" to obtain the file.
+5. Run the command "./remote <input_file.txt> <output_file.hepmc> <muon_generation_height> <detector_position_x> <detector_position_y> <detector_position_z> <z_offset> <E_cut>" to obtain the file.
 
 6. Everytime you change the parameter in the converter, you will have to rerun the compiling code for changes to be updated.
 
