@@ -2,30 +2,34 @@ start=$(date +%s)
 # events (pass as first argument, default 1000)
 numEvent=${1:-1000}
 configs=('free' 'target')
-x=(0 0 0 0)
-y=(0 0 0 0)
-z=(1 -25 -50 -100)
+x=(0 0 0 0 50 50 50 -25 -25 -25)
+y=(0 0 0 0 0 0 0 -25 -25 -25)
+z=(1 -25 -50 -100 -25 -50 -100 -25 -50 -100)
+output_path="${DETECTOR_PATH}/data/nine_v5"
+hepmc_path="${DETECTOR_PATH}/hepmc/ten_2x4x8"
+xml="${DETECTOR_PATH}/detectors/square_v2/merge.xml"
 # Detector XML configs
 # Loop over XML files and i=0..5
 
+mkdir ${output_path}
 for j in {0..1}; do
     output_files=()
-    for i in {0..3}; do
+    for i in {0..9}; do
     
         export DET_X=${x[i]}
         export DET_Y=${y[i]}
         export DET_Z=${z[i]}
         export CONFIG=${configs[j]}
 
-        xml="test/merge.xml"
-        output_file="testing_merge_${configs[j]}_${i}.edm4hep.root"
-
+        
+        output_file="ten_2x4x8_${configs[j]}_${i}.edm4hep.root"
+        hepmc_file="nine_detectors_${i}.hepmc"
         ddsim \
-            --compactFile ~/muography_backup/detectors/${xml} \
-            --inputFiles   ~/muography/cry_v1.7/test/square_2x4x8_v2_1.hepmc \
-            --outputFile   ~/muography/data/${output_file} \
-            --numberOfEvents ${numEvent} \
-	    --steeringFile steering.py
+            --compactFile ${xml} \
+            --inputFiles   ${hepmc_path}/${hepmc_file} \
+            --outputFile   ${output_path}/${output_file} \
+            --numberOfEvents 20000000 \
+    	    --steeringFile steering.py
     done
 
 done
