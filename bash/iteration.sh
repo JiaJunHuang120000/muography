@@ -1,20 +1,13 @@
 start=$(date +%s)
-# events (pass as first argument, default 1000)
-numEvent=${1:-1000}
-configs=('free' 'target')
-x=(0 0 0 0 50 50 50 -25 -25 -25)
-y=(0 0 0 0 0 0 0 -25 -25 -25)
-z=(1 -25 -50 -100 -25 -50 -100 -25 -50 -100)
-output_path="${DETECTOR_PATH}/data/nine_v5"
-hepmc_path="${DETECTOR_PATH}/hepmc/ten_2x4x8"
-xml="${DETECTOR_PATH}/detectors/square_v2/merge.xml"
-# Detector XML configs
-# Loop over XML files and i=0..5
+numEvent=${number_of_events}
+configs=${world_configurations}
+x=${detector_pos_x}
+y=${detector_pos_y}
+z=${detector_pos_z}
+hepmc_path=${input_hepmc_path}
 
-mkdir ${output_path}
-for j in {0..1}; do
-    output_files=()
-    for i in {0..9}; do
+for j in $(seq 0 ${#world_configurations}); do
+    for i in $(seq 0 ${number_of_detector}); do
     
         export DET_X=${x[i]}
         export DET_Y=${y[i]}
@@ -22,14 +15,12 @@ for j in {0..1}; do
         export CONFIG=${configs[j]}
 
         
-        output_file="ten_2x4x8_${configs[j]}_${i}.edm4hep.root"
-        hepmc_file="nine_detectors_${i}.hepmc"
         ddsim \
-            --compactFile ${xml} \
-            --inputFiles   ${hepmc_path}/${hepmc_file} \
-            --outputFile   ${output_path}/${output_file} \
-            --numberOfEvents 20000000 \
-    	    --steeringFile steering.py
+            --compactFile ${input_detector_file} \
+            --inputFiles   "${hepmc_file_path}/${detector_name}_${i}.hepmc" \
+            --outputFile   "${output_file_path}/${detector_name}_${configs[j]}_${i}.edm4hep.root" \
+            --numberOfEvents ${numEvent[i]} \
+    	    --steeringFile ${DETECTOR_PATH}/steering.py
     done
 
 done

@@ -1,0 +1,86 @@
+<?xml version='1.0' encoding='utf-8'?>
+<lccdd><info name="ZDC_prototype.xml" title="SiPM-on-Tile Zero-Degree Calorimeter Hcal Prototype, Fe/Sc" author="@rymilton" url="https://github.com/rymilton" status="development" version="1.0"><comment /></info>
+
+
+<std_conditions type="NTP" />
+
+<includes>
+    <gdmlFile ref="${DD4hepINSTALL}/DDDetectors/compact/elements.xml" />
+    <gdmlFile ref="${DETECTOR_PATH}/compact/materials.xml" />
+</includes>
+
+  <display>
+    <include ref="${DETECTOR_PATH}/compact/colors.xml" />
+  </display>
+
+  <define>
+    <constant name="Pi" value="3.14159265359" />
+    <constant name="mil" value="0.0254*mm" />
+    <constant name="inch" value="2.54*cm" />
+  </define>
+
+<detectors>
+<detector id="2000" name="RockWithCubeCutout" type="RockWithCubeCutout" vis="AnlGray" material="Rock">
+  <dimensions x="world_dx" y="world_dy" z="world_dz" />
+  <position x="0" y="0" z="-world_dz/2" />
+
+  <cube>
+    <dimensions x="0.5*m" y="0.5*m" z="1*m" />
+    <position x="Detector_x_pos" y="Detector_y_pos" z="Detector_z_pos" />
+  </cube>
+
+
+    
+  <sphere>
+    <dimensions r="20*m" />
+    <position x="50*m" y="0*m" z="-20*m" />
+  </sphere>
+    
+  <sphere>
+    <dimensions r="5*m" />
+    <position x="0*m" y="20*m" z="-5*m" />
+  </sphere>
+    
+  <sphere>
+    <dimensions r="5*m" />
+    <position x="5*m" y="0*m" z="-5*m" />
+  </sphere>
+    
+  <sphere>
+    <dimensions r="5*m" />
+    <position x="-10*m" y="0*m" z="-35*m" />
+  </sphere>
+    
+  <sphere>
+    <dimensions r="10*m" />
+    <position x="0*m" y="40*m" z="-65*m" />
+  </sphere>
+    
+  <sphere>
+    <dimensions r="10*m" />
+    <position x="0*m" y="-60*m" z="-20*m" />
+  </sphere>
+    
+  <cube>
+    <dimensions x="10*m" y="10*m" z="10*m" />
+    <position x="12*m" y="7*m" z="-25*m" />
+  </cube>
+    
+  <cube>
+    <dimensions x="5*m" y="5*m" z="5*m" />
+    <position x="-30*m" y="-30*m" z="-10*m" />
+  </cube>
+
+</detector>
+    
+<detector id="2001" name="ExtraCube" type="RockWithCubeCutout" vis="AnlGray" material="LeadOxide">
+  <dimensions x="10*m" y="10*m" z="10*m" />
+  <position x="12*m" y="7*m" z="-25*m" />
+</detector> 
+    
+<detector id="2002" name="ExtraCube1" type="RockWithCubeCutout" vis="AnlGray" material="LeadOxide">
+  <dimensions x="5*m" y="5*m" z="5*m" />
+  <position x="-30*m" y="-30*m" z="-10*m" />
+</detector> 
+    
+</detectors></lccdd>
