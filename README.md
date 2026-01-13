@@ -32,8 +32,23 @@ mkdir data
 ddsim --compactFile xml/square_2x4x8.xml       --outputFile data/test.root       --inputFiles hepmc/output.hepmc       --numberOfEvents 5       --steeringFile steering.py
 ```
 
+### Parameters for CRY
 
-## Standalone instruction on how to run CRY library for generating cosmic muon and filtering for detector level muons:
+1. To change the area of muons hit at sea level, change the [subboxLength] in [setup.file] (units in m). This will create a 2d box of length^2.
+3. To change the other parameters of the muon generation, you will need to either change the parameters inside [bash/gen_cry.sh] or in the terminal where you manualy enter the command in the above section.
+4. For the number of events taken from raw CRY output, change line 2 and the number [100] to desired number of events you need. You will need higher events than needed if you are applying a energy cut later, it is suggested you generate a large pool of events as a base events such you can grab later on.
+5. In line 6 is the rest of the parameters you can change in the process of CRY to hepmc, following the variables <input_file.txt> <output_file.hepmc> <muon_generation_height> <detector_position_x> <detector_position_y> <detector_position_z> <z_offset> <E_cut> <number_of_events>.
+   - <input_file.txt> = raw CRY file for event filtering and processing
+   - <output_file.hepmc> = output hepmc path for ddsim events
+   - <muon_generation_height> = height of the generate muons (m)
+   - <detector_position_xyz> = xyz position of the center of the detector, where the muons will always cross (m)
+   - <z_offset> = the z/2 length of the detector such that muons will be generate as a volumn that encovers the detector rather than a plane, this is a normal random distribution offset of the plane applied manualy in the code (m)
+   - <E_cut> = the energy filtering of the raw CRY events, note it does not modify for energy but just filter for events from raw CRY output that passes (GeV)
+   - <number_of_events> = number of events you want inside the output hepmc file, the number is based on the filtering so it may be less than expected.
+6. If you would like realistic comparison of the number of events at different height, you need to use the same <number_of_events> with different <E_cut> (height/2) for comparison.
+
+
+## (Not needed but good to have) Standalone instruction on how to run CRY library for generating cosmic muon and filtering for detector level muons:
 
 1. Install the CRY package from website https://nuclear.llnl.gov/simulation/ if current version is not working correctly.
 
@@ -56,18 +71,3 @@ ddsim --compactFile xml/square_2x4x8.xml       --outputFile data/test.root      
 6. Everytime you change the parameter in the converter, you will have to rerun the compiling code for changes to be updated.
 
 7. The converter changes the plane where the muons will be generated and set a detection plane with user defined area for muon detection.
-
-### Parameters for CRY
-
-1. To change the area of muons hit at sea level, change the [subboxLength] in [setup.file] (units in m). This will create a 2d box of length^2.
-3. To change the other parameters of the muon generation, you will need to either change the parameters inside [bash/gen_cry.sh] or in the terminal where you manualy enter the command in the above section.
-4. For the number of events taken from raw CRY output, change line 2 and the number [100] to desired number of events you need. You will need higher events than needed if you are applying a energy cut later, it is suggested you generate a large pool of events as a base events such you can grab later on.
-5. In line 6 is the rest of the parameters you can change in the process of CRY to hepmc, following the variables <input_file.txt> <output_file.hepmc> <muon_generation_height> <detector_position_x> <detector_position_y> <detector_position_z> <z_offset> <E_cut> <number_of_events>.
-   - <input_file.txt> = raw CRY file for event filtering and processing
-   - <output_file.hepmc> = output hepmc path for ddsim events
-   - <muon_generation_height> = height of the generate muons (m)
-   - <detector_position_xyz> = xyz position of the center of the detector, where the muons will always cross (m)
-   - <z_offset> = the z/2 length of the detector such that muons will be generate as a volumn that encovers the detector rather than a plane, this is a normal random distribution offset of the plane applied manualy in the code (m)
-   - <E_cut> = the energy filtering of the raw CRY events, note it does not modify for energy but just filter for events from raw CRY output that passes (GeV)
-   - <number_of_events> = number of events you want inside the output hepmc file, the number is based on the filtering so it may be less than expected.
-6. If you would like realistic comparison of the number of events at different height, you need to use the same <number_of_events> with different <E_cut> (height/2) for comparison.
