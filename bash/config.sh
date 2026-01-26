@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export number_of_detector=3
-export detector_name='small_pixel_64'
+export detector_name='planar'
 export output_file_path="${DETECTOR_PATH}/data/${detector_name}"
 export hepmc_file_path="${DETECTOR_PATH}/hepmc/${detector_name}"
 
@@ -10,38 +10,39 @@ mkdir -p "${output_file_path}"
 mkdir -p "${hepmc_file_path}"
 
 # CRY Variables
-export CRY_num_of_events=(1000000 1000000 1000000)
-export generation_height=15
-export detector_total_length=
-export energy_cutoff=(0 0 0)
-export input_cry_file="${DETECTOR_PATH}/hepmc/120M_events.txt"
+export CRY_num_of_events=(100000 100000 100000)
+export generation_height=20 #(m)
+export detector_z_offset=0.3 #(m)
+export detector_y_offset=0.3 #(m)
+export detector_x_offset=0.3 #(m)
+export energy_cutoff=(0 0 0) #(GeV)
+export input_cry_file="${DETECTOR_PATH}/hepmc/100M_events.txt"
 
 # DDsim Variables
 export world_configurations=('free' 'target')
-export detector_xml_name="square_flat_target.xml"
-export input_detector_file="${DETECTOR_PATH}/detectors/square_v2/merge.xml"
+export detector_xml_name="square_flat_target"
+export input_detector_file="${DETECTOR_PATH}/detectors/${detector_name}/merge.xml"
 
-export detector_pos_x=(0 -5 5)
-export detector_pos_y=(0 -5 5)
-export detector_pos_z=(0.5 0.5 0.5)
-export number_of_events=(1000000 1000000 1000000)
+export detector_pos_x=(0 -5 5) #(m)
+export detector_pos_y=(0 -5 5) #(m)
+export detector_pos_z=(0.5 0.5 0.5) #(m)
+export number_of_events=(100000 100000 100000)
 
-
-# cry area
 # gnn voxel
 
 # =========================
 # Target geometry definition
 # =========================
 
-export world_area=20
-export world_depth=1
+export world_area=2000 #(m)
+export world_depth=200 #(m)
 export world_top_material="Air"
 export world_bottom_material="Rock"
+export pixel_size=3 #(m)
 
 TARGETS=(
-"sphere r=3*m   x=0*m   y=5*m    z=5*m    material=LeadOxide"
-"cube   xdim=2*m ydim=2*m zdim=2*m x=0*m  y=0*m  z=5*m    material=Steel235"
+#"sphere r=3*m   x=0*m   y=5*m    z=5*m    material=LeadOxide"
+"cube   xdim=10*m ydim=10*m zdim=10*m x=0*m  y=0*m  z=10*m    material=Steel235"
   # "sphere r=20*m   x=50*m   y=0*m    z=-20*m    material=Vacuum"
   # "sphere r=5*m    x=0*m    y=20*m   z=-5*m    material=Vacuum"
   # "sphere r=5*m    x=5*m    y=0*m    z=-5*m    material=Vacuum"
