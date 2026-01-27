@@ -4,12 +4,10 @@ export number_of_detector=3
 export detector_name='planar_detector'
 export output_file_path="${DETECTOR_PATH}/data/${detector_name}"
 export hepmc_file_path="${DETECTOR_PATH}/hepmc/${detector_name}"
-export detector_file_path="${DETECTOR_PATH}/detectors/${detector_name}"
 
 # Create directories
 mkdir -p "${output_file_path}"
 mkdir -p "${hepmc_file_path}"
-mkdir -p "${detector_file_path}"
 
 # CRY Variables
 export CRY_num_of_events=(100000 100000 100000)
