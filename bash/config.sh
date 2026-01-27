@@ -12,7 +12,7 @@ mkdir -p "${hepmc_file_path}"
 mkdir -p "${detector_file_path}"
 
 # CRY Variables
-export CRY_num_of_events=(100000 100000 100000)
+export CRY_num_of_events=(100 100 100)
 export generation_height=20 #(m)
 export detector_z_offset=0.3 #(m)
 export detector_y_offset=0.3 #(m)
@@ -28,7 +28,7 @@ export input_detector_file="${DETECTOR_PATH}/detectors/${detector_name}/merge.xm
 export detector_pos_x=(0 -5 5) #(m)
 export detector_pos_y=(0 -5 5) #(m)
 export detector_pos_z=(0.5 0.5 0.5) #(m)
-export number_of_events=(100000 100000 100000) # Events simulated in ddsim
+export number_of_events=(100 100 100) # Events simulated in ddsim
 
 # =========================
 # Target geometry definition
