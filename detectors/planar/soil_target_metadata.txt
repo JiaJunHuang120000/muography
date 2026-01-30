@@ -1,0 +1,20 @@
+ Detector Voxelization Results
+==================================================
+
+Voxel grid shape: (5, 5, 5)
+Resolution: 5
+Total voxels: 125
+Material voxels: 19
+Empty voxels: 106
+Bounding box (mm):
+  X: [-20000.0, 20000.0]
+  Y: [-20000.0, 20000.0]
+  Z: [-20000.0, 20000.0]
+
+Detectors:
+  - RockWithCubeCutout (${world_bottom_material}):
+    Position: (0.0, 0.0, 0.0) mm
+    Size: 0.0 × 0.0 × 0.0 mm
+  - ExtraCube1 (Steel235):
+    Position: (0.0, 0.0, 10000.0) mm
+    Size: 10000.0 × 10000.0 × 10000.0 mm

@@ -336,7 +336,11 @@ class Voxelizer:
         """Create voxel grid from the geometry - FIXED VERSION"""
         if not self.parser.detectors:
             print("No detectors to voxelize")
-            return np.zeros((self.resolution, self.resolution, self.resolution)), {}
+            voxel_grid = np.zeros((self.resolution, self.resolution, self.resolution))
+            voxel_coords = np.zeros((self.resolution, self.resolution, self.resolution, 3))
+            bbox = {}
+            return voxel_grid, voxel_coords, bbox
+
         pixel_size = float(os.getenv('pixel_size')) # Meters
         world_size = int(pixel_size*int(self.resolution)*1000)
         # Use world dimensions directly from your XML
@@ -367,6 +371,29 @@ class Voxelizer:
         
         print(f"\n📐 Voxel size: {voxel_size_x:.1f} × {voxel_size_y:.1f} × {voxel_size_z:.1f} mm")
         print(f"   Total voxels: {self.resolution**3:,}")
+
+        # Create voxel coordinate grid (world geometry)
+        xs = np.linspace(
+            bbox['x_min'] + voxel_size_x / 2,
+            bbox['x_max'] - voxel_size_x / 2,
+            self.resolution
+        )
+        ys = np.linspace(
+            bbox['y_min'] + voxel_size_y / 2,
+            bbox['y_max'] - voxel_size_y / 2,
+            self.resolution
+        )
+        zs = np.linspace(
+            bbox['z_min'] + voxel_size_z / 2,
+            bbox['z_max'] - voxel_size_z / 2,
+            self.resolution
+        )
+        
+        # Shape: (Nx, Ny, Nz, 3)
+        voxel_coords = np.stack(
+            np.meshgrid(xs, ys, zs, indexing='ij'),
+            axis=-1
+        )
         
         # Voxelize each detector
         for det in self.parser.detectors:
@@ -418,7 +445,7 @@ class Voxelizer:
             print(f"   Voxelized {det['name']}: "
                   f"[{i_min}:{i_max}, {j_min}:{j_max}, {k_min}:{k_max}]")
         
-        return voxel_grid, bbox
+        return voxel_grid, voxel_coords, bbox
     
     def plot_voxel_slices(self, voxel_grid):
         """Plot slices through the voxel grid"""
@@ -458,7 +485,7 @@ class Voxelizer:
         plt.tight_layout()
         plt.show()
     
-    def save_results(self, voxel_grid, bbox, prefix='_Detector'):
+    def save_results(self, voxel_grid, voxel_coords, bbox, prefix='_Detector'):
         """Save voxel grid and metadata"""
         # Save voxel grid
         voxel_file = f'{prefix}_voxels.npy'
@@ -467,6 +494,10 @@ class Voxelizer:
         voxel_file_pkl = f'{prefix}_voxels.pkl'
         with open(voxel_file_pkl, 'wb') as f:
             pickle.dump(voxel_grid, f)
+
+        voxel_coords_file = f'{prefix}_voxel_coords.pkl'
+        with open(voxel_coords_file, 'wb') as f:
+            pickle.dump(voxel_coords, f)
         
         
         # Save metadata
@@ -573,14 +604,14 @@ def main():
             voxelizer = Voxelizer(parser, resolution=resolution)
             
             # Create voxel grid
-            voxel_grid, bbox = voxelizer.create_voxel_grid()
+            voxel_grid, voxel_coords, bbox = voxelizer.create_voxel_grid()
             
             # Plot slices
             voxelizer.plot_voxel_slices(voxel_grid)
             
             # Save results
             prefix = os.path.splitext(os.path.basename(xml_file))[0]
-            voxelizer.save_results(voxel_grid, bbox, prefix=prefix)
+            voxelizer.save_results(voxel_grid, voxel_coords, bbox, prefix=prefix)
         
         if choice == '5':
             print("\n👋 Goodbye!")
@@ -602,7 +633,7 @@ def quick_visualize(xml_file):
     
     # Quick voxelization
     voxelizer = Voxelizer(parser, resolution=32)
-    voxel_grid, _ = voxelizer.create_voxel_grid()
+    voxel_grid, _, _ = voxelizer.create_voxel_grid()
     
     # Show summary
     print(f"\n📊 Voxel grid summary:")
