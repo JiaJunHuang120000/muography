@@ -42,6 +42,11 @@ soruce bash/config.sh
 bash bash/multi.sh
 bash bash/iteration.sh
 
+cd $output_file_path
+pyhton3 $DETECTOR_PATH/bash/config.sh/dd4hep_viz.py $detector_file_path/soil_target.xml
+cd $DETECTOR_PATH
+
+
 ```
 
 
