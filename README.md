@@ -39,13 +39,13 @@ For running the scripts for multi-detectors, you will need to first change all o
 source setup_env.sh 
 soruce bash/config.sh
 
-bash bash/multi.sh
-bash bash/iteration.sh
-
 cd $output_file_path
+python3 $DETECTOR_PATH/bash/config.sh/generate_soil_target.py $DETECTOR_PATH/soil_target.template.xml
 pyhton3 $DETECTOR_PATH/bash/config.sh/dd4hep_viz.py $detector_file_path/soil_target.xml
 cd $DETECTOR_PATH
 
+bash bash/multi.sh
+bash bash/iteration.sh
 
 ```
 
