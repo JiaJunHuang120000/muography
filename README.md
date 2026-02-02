@@ -28,8 +28,7 @@ bash bash/dd4hep_compile.sh
 
 source setup_env.sh 
 bash build.sh
-mkdir data
-ddsim --compactFile xml/square_2x4x8.xml       --outputFile data/test.root       --inputFiles hepmc/output.hepmc       --numberOfEvents 5       --steeringFile steering.py
+ddsim --help
 ```
 
 For each time you start a new environment, please do ```source setup_env.sh``` in order for ddsim and python scripts to work properly.
@@ -46,6 +45,8 @@ cd $DETECTOR_PATH
 
 bash bash/multi.sh
 bash bash/iteration.sh
+
+python3 script/root_to_pkl_and_splitting.py
 
 ```
 
@@ -66,28 +67,3 @@ bash bash/iteration.sh
    - <E_cut> = the energy filtering of the raw CRY events, note it does not modify for energy but just filter for events from raw CRY output that passes (GeV)
    - <number_of_events> = number of events you want inside the output hepmc file, the number is based on the filtering so it may be less than expected.
 6. If you would like realistic comparison of the number of events at different height, you need to use the same <number_of_events> with different <E_cut> (height/2) for comparison.
-
-
-## (Not needed but good to have) Standalone instruction on how to run CRY library for generating cosmic muon and filtering for detector level muons:
-
-1. Install the CRY package from website https://nuclear.llnl.gov/simulation/ if current version is not working correctly.
-
-2. Run "make" in the top repository to compile for testMain excutable in /test/ folder.
-
-3. Change the settings in "setup.file" to desire and run the command "./testMain $HOME/muography/setup.file 10 > out.txt" for the total number of events of muons and ouput into file out.txt.
-
-4. Compile the "remote.cxx" in the /cpp/ folder, the excutable to convert CRY output to .hepmc format
-
-```source $HOME/root_install/bin/thisroot.sh```
-
-```export LD_LIBRARY_PATH=$HOME/muography/hepmc3-install/lib:$LD_LIBRARY_PATH```
-
-```HEPMC3_INSTALL=$HOME/muography/hepmc3-install```
-
-```g++ -I. -I../src -o remote cpp/remote.cxx  -L../lib -lCRY  -I$HEPMC3_INSTALL/include -L$HEPMC3_INSTALL/lib -lHepMC3 `root-config --cflags --libs` -lEG -lGeom```
-
-5. Run the command "./remote <input_file.txt> <output_file.hepmc> <muon_generation_height> <detector_position_x> <detector_position_y> <detector_position_z> <z_offset> <E_cut> <number_of_events>" to obtain the file.
-
-6. Everytime you change the parameter in the converter, you will have to rerun the compiling code for changes to be updated.
-
-7. The converter changes the plane where the muons will be generated and set a detection plane with user defined area for muon detection.

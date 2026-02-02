@@ -30,6 +30,10 @@ export detector_pos_y=(0 -5 5) #(m)
 export detector_pos_z=(0.5 0.5 0.5) #(m)
 export number_of_events=(100 100 100) # Events simulated in ddsim
 
+export detector_pos_x_env="${detector_pos_x[@]}" # Export to string for Python
+export detector_pos_y_env="${detector_pos_y[@]}"
+export detector_pos_z_env="${detector_pos_z[@]}" 
+
 # =========================
 # Target geometry definition
 # =========================
