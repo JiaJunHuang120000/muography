@@ -12,6 +12,8 @@ import re
 import sys
 import os
 import pickle
+import re
+from pathlib import Path
 
 def parse_dd4hep_constant(value_str):
     """Parse DD4hep constant values like '10*cm', '5*m', etc."""
@@ -51,6 +53,50 @@ def parse_dd4hep_constant(value_str):
             return float(value_str)
         except:
             return 0
+
+
+def read_detectors_from_config_file():
+    """
+    Read detector positions directly from config.sh (bash arrays).
+    Units: meters → millimeters
+    """
+    detector_path = os.getenv("DETECTOR_PATH")
+    if detector_path is None:
+        raise RuntimeError("DETECTOR_PATH is not set")
+
+    cfg = Path(detector_path) / "bash" / "config.sh"
+    if not cfg.exists():
+        raise FileNotFoundError(f"Config file not found: {cfg}")
+
+    text = cfg.read_text()
+
+    def parse_array(var):
+        m = re.search(rf"{var}\s*=\s*\(([^)]*)\)", text)
+        if not m:
+            raise RuntimeError(f"Variable {var} not found in config.sh")
+        return [float(x) for x in m.group(1).split()]
+
+    xs = parse_array("detector_pos_x")
+    ys = parse_array("detector_pos_y")
+    zs = parse_array("detector_pos_z")
+
+    if not (len(xs) == len(ys) == len(zs)):
+        raise RuntimeError("detector_pos arrays have inconsistent lengths")
+
+    detectors = []
+    for i, (x, y, z) in enumerate(zip(xs, ys, zs)):
+        detectors.append({
+            "id": i,
+            "name": f"detector_{i}",
+            "position_mm": {
+                "x": x * 1000.0,
+                "y": y * 1000.0,
+                "z": z * 1000.0,
+            },
+        })
+
+    return detectors
+
 
 class DetectorParser:
     def __init__(self, xml_file, resolution=64):
@@ -336,11 +382,7 @@ class Voxelizer:
         """Create voxel grid from the geometry - FIXED VERSION"""
         if not self.parser.detectors:
             print("No detectors to voxelize")
-            voxel_grid = np.zeros((self.resolution, self.resolution, self.resolution))
-            voxel_coords = np.zeros((self.resolution, self.resolution, self.resolution, 3))
-            bbox = {}
-            return voxel_grid, voxel_coords, bbox
-
+            return np.zeros((self.resolution, self.resolution, self.resolution)), {}
         pixel_size = float(os.getenv('pixel_size')) # Meters
         world_size = int(pixel_size*int(self.resolution)*1000)
         # Use world dimensions directly from your XML
@@ -371,29 +413,6 @@ class Voxelizer:
         
         print(f"\n📐 Voxel size: {voxel_size_x:.1f} × {voxel_size_y:.1f} × {voxel_size_z:.1f} mm")
         print(f"   Total voxels: {self.resolution**3:,}")
-
-        # Create voxel coordinate grid (world geometry)
-        xs = np.linspace(
-            bbox['x_min'] + voxel_size_x / 2,
-            bbox['x_max'] - voxel_size_x / 2,
-            self.resolution
-        )
-        ys = np.linspace(
-            bbox['y_min'] + voxel_size_y / 2,
-            bbox['y_max'] - voxel_size_y / 2,
-            self.resolution
-        )
-        zs = np.linspace(
-            bbox['z_min'] + voxel_size_z / 2,
-            bbox['z_max'] - voxel_size_z / 2,
-            self.resolution
-        )
-        
-        # Shape: (Nx, Ny, Nz, 3)
-        voxel_coords = np.stack(
-            np.meshgrid(xs, ys, zs, indexing='ij'),
-            axis=-1
-        )
         
         # Voxelize each detector
         for det in self.parser.detectors:
@@ -445,7 +464,7 @@ class Voxelizer:
             print(f"   Voxelized {det['name']}: "
                   f"[{i_min}:{i_max}, {j_min}:{j_max}, {k_min}:{k_max}]")
         
-        return voxel_grid, voxel_coords, bbox
+        return voxel_grid, bbox
     
     def plot_voxel_slices(self, voxel_grid):
         """Plot slices through the voxel grid"""
@@ -484,8 +503,27 @@ class Voxelizer:
         plt.suptitle(f' Detector Voxel Grid ({resolution}³ resolution)')
         plt.tight_layout()
         plt.show()
+
     
-    def save_results(self, voxel_grid, voxel_coords, bbox, prefix='_Detector'):
+    def world_to_voxel(self, x, y, z, bbox):
+        """Convert world coordinates (mm) to voxel indices (i,j,k)"""
+        rx = (x - bbox['x_min']) / (bbox['x_max'] - bbox['x_min'])
+        ry = (y - bbox['y_min']) / (bbox['y_max'] - bbox['y_min'])
+        rz = (z - bbox['z_min']) / (bbox['z_max'] - bbox['z_min'])
+    
+        i = int(rx * self.resolution)
+        j = int(ry * self.resolution)
+        k = int(rz * self.resolution)
+    
+        # Clamp safely
+        i = max(0, min(self.resolution - 1, i))
+        j = max(0, min(self.resolution - 1, j))
+        k = max(0, min(self.resolution - 1, k))
+    
+        return i, j, k
+
+        
+    def save_results(self, voxel_grid, bbox, prefix='_Detector'):
         """Save voxel grid and metadata"""
         # Save voxel grid
         voxel_file = f'{prefix}_voxels.npy'
@@ -494,12 +532,33 @@ class Voxelizer:
         voxel_file_pkl = f'{prefix}_voxels.pkl'
         with open(voxel_file_pkl, 'wb') as f:
             pickle.dump(voxel_grid, f)
-
-        voxel_coords_file = f'{prefix}_voxel_coords.pkl'
-        with open(voxel_coords_file, 'wb') as f:
-            pickle.dump(voxel_coords, f)
+            
+        # ---- read detectors from config.sh (text parsing) ----
+        detectors = read_detectors_from_config_file()
         
+        detector_voxels = []
+        for det in detectors:
+            p = det["position_mm"]
         
+            i, j, k = self.world_to_voxel(
+                p["x"], p["y"], p["z"], bbox
+            )
+        
+            flat = (
+                i * self.resolution * self.resolution
+                + j * self.resolution
+                + k
+            )
+        
+            detector_voxels.append({
+                "id": det["id"],
+                "name": det["name"],
+                "position_mm": p,
+                "voxel_ijk": (i, j, k),
+                "voxel_flat": flat,
+            })
+        
+                
         # Save metadata
         metadata = {
             'voxel_grid_shape': voxel_grid.shape,
@@ -509,8 +568,10 @@ class Voxelizer:
             'total_voxels': voxel_grid.size,
             'max_density': float(voxel_grid.max()),
             'min_density': float(voxel_grid.min()),
-            'detectors': self.parser.detectors
+            'targets': self.parser.detectors,
+            'detectors': detector_voxels,
         }
+
         
         metadata_file = f'{prefix}_metadata.npy'
         np.save(metadata_file, metadata, allow_pickle=True)
@@ -529,13 +590,31 @@ class Voxelizer:
             f.write(f"  Y: [{bbox['y_min']:.1f}, {bbox['y_max']:.1f}]\n")
             f.write(f"  Z: [{bbox['z_min']:.1f}, {bbox['z_max']:.1f}]\n\n")
             
-            f.write(f"Detectors:\n")
+            f.write(f"Targets:\n")
             for det in self.parser.detectors:
                 f.write(f"  - {det['name']} ({det['material']}):\n")
                 f.write(f"    Position: ({det['position']['x']:.1f}, "
                        f"{det['position']['y']:.1f}, {det['position']['z']:.1f}) mm\n")
                 f.write(f"    Size: {det['dimensions']['x']:.1f} × "
                        f"{det['dimensions']['y']:.1f} × {det['dimensions']['z']:.1f} mm\n")
+
+            f.write("\nDetector positions (from config.sh):\n")
+            f.write("=" * 50 + "\n")
+            
+            for d in detector_voxels:
+                f.write(f"Detector {d['id']}:\n")
+                f.write(
+                    f"  Position (mm): "
+                    f"x={d['position_mm']['x']:.1f}, "
+                    f"y={d['position_mm']['y']:.1f}, "
+                    f"z={d['position_mm']['z']:.1f}\n"
+                )
+                f.write(
+                    f"  Voxel index (i,j,k): {d['voxel_ijk']}\n"
+                )
+                f.write(
+                    f"  Flat voxel number: {d['voxel_flat']}\n\n"
+                )
         
         print(f"\n💾 Results saved:")
         print(f"   Voxel grid: {voxel_file}")
@@ -543,6 +622,8 @@ class Voxelizer:
         print(f"   Metadata (text): {prefix}_metadata.txt")
         
         return voxel_file, metadata_file
+
+
 
 
 def main():
@@ -604,14 +685,14 @@ def main():
             voxelizer = Voxelizer(parser, resolution=resolution)
             
             # Create voxel grid
-            voxel_grid, voxel_coords, bbox = voxelizer.create_voxel_grid()
+            voxel_grid, bbox = voxelizer.create_voxel_grid()
             
             # Plot slices
             voxelizer.plot_voxel_slices(voxel_grid)
             
             # Save results
             prefix = os.path.splitext(os.path.basename(xml_file))[0]
-            voxelizer.save_results(voxel_grid, voxel_coords, bbox, prefix=prefix)
+            voxelizer.save_results(voxel_grid, bbox, prefix=prefix)
         
         if choice == '5':
             print("\n👋 Goodbye!")
@@ -633,7 +714,7 @@ def quick_visualize(xml_file):
     
     # Quick voxelization
     voxelizer = Voxelizer(parser, resolution=32)
-    voxel_grid, _, _ = voxelizer.create_voxel_grid()
+    voxel_grid, _ = voxelizer.create_voxel_grid()
     
     # Show summary
     print(f"\n📊 Voxel grid summary:")
