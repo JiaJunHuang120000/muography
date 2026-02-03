@@ -1,5 +1,5 @@
 cd cry_v1.7/test/
-./testMain ../../setup.file 100 > output.txt
+./testMain ../../cpp/setup.file 100 > output.txt
 
 cd ../..
 mkdir -p hepmc
