@@ -30,6 +30,8 @@ void gen_cosmic_muons(const std::string& input_file,
                       float detector_y,
                       float detector_z,
                       float z_off,
+                      float y_off,
+                      float x_off,
                       float E_cut,
                       int max_events)   // 🚨 stop after this many general events
 {
@@ -114,9 +116,12 @@ void gen_cosmic_muons(const std::string& input_file,
         std::random_device rd;
         std::mt19937 gen(rd());
         std::uniform_real_distribution<> z_dist(-z_off * 1000.0, z_off * 1000.0);
+        std::uniform_real_distribution<> y_dist(-y_off * 1000.0, y_off * 1000.0);
+        std::uniform_real_distribution<> x_dist(-x_off * 1000.0, x_off * 1000.0);
 
-        const TVector3 position(-1*(x_intersect)+start_x, 
-                                -1*(y_intersect)+start_y, 
+        
+        const TVector3 position(-1*(x_intersect)+start_x+x_dist(gen), 
+                                -1*(y_intersect)+start_y+y_dist(gen), 
                                 target_z+z_dist(gen));
 
         // Create HepMC3 event
@@ -167,7 +172,7 @@ void gen_cosmic_muons(const std::string& input_file,
 }
 
 int main(int argc, char* argv[]) {
-    if (argc < 10) {
+    if (argc < 12) {
         std::cerr << "Usage: " << argv[0]
                   << " <input_file.txt> <output_file.hepmc>"
                   << " <muon_generation_height>"
@@ -175,6 +180,8 @@ int main(int argc, char* argv[]) {
                   << " <detector_position_y>"
                   << " <detector_position_z>" 
                   << " <z_offset>"
+                  << " <y_offset>"
+                  << " <x_offset>"
                   << " <E_cut>"
                   << " <max_events>" << std::endl;
         return 1;
@@ -187,12 +194,14 @@ int main(int argc, char* argv[]) {
     float detector_y     = std::stof(argv[5]);
     float detector_z     = std::stof(argv[6]);
     float z_off          = std::stof(argv[7]);
-    float E_cut          = std::stof(argv[8]);
-    int max_events       = std::stoi(argv[9]);
+    float y_off          = std::stof(argv[8]);
+    float x_off          = std::stof(argv[9]);
+    float E_cut          = std::stof(argv[10]);
+    int max_events       = std::stoi(argv[11]);
 
     gen_cosmic_muons(input_file, output_file, target_height,
                      detector_x, detector_y, detector_z,
-                     z_off, E_cut, max_events);
+                     z_off, y_off, x_off, E_cut, max_events);
 
     return 0;
 }

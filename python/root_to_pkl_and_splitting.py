@@ -44,7 +44,7 @@ def theta_x_y(x, y, z):
                            np.array(y)[:, np.newaxis], 
                            np.array(z)[:, np.newaxis]), 
                           axis=1)
-    datamean = data.mean(axis=0)import mplhep as hep
+    datamean = data.mean(axis=0)
 
     centered_data = data - datamean
 
@@ -61,7 +61,7 @@ def theta_x_y(x, y, z):
     return tanx, tany
 
 
-path = os.getenv('output_file_path')
+path = os.getenv('output_file_path')+'/'
 files = sorted(os.listdir(path))
 
 posx = list(map(float, os.environ["detector_pos_x_env"].split()))
@@ -228,9 +228,3 @@ for config in ['free','target']:
         pickle.dump(batches, fout)
     print('/nDone' + f'for {config}' + '/n')
 
-    # Clean cache
-    gc.collect()
-    try:
-        np._globals._clearcache()
-    except:
-        pass

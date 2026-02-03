@@ -12,23 +12,23 @@ mkdir -p "${hepmc_file_path}"
 mkdir -p "${detector_file_path}"
 
 # CRY Variables
-export CRY_num_of_events=(100 100 100)
+export CRY_num_of_events=(1000 1000 1000)
 export generation_height=20 #(m)
 export detector_z_offset=0.3 #(m)
-export detector_y_offset=0.3 #(m)
-export detector_x_offset=0.3 #(m)
+export detector_y_offset=0.0 #(m)
+export detector_x_offset=0.0 #(m)
 export energy_cutoff=(0 0 0) #(GeV)
-export input_cry_file="${DETECTOR_PATH}/hepmc/100M_events.txt"
+export input_cry_file="${DETECTOR_PATH}/hepmc/output.txt"
 
 # DDsim Variables
 export world_configurations=('free' 'target')
-export detector_xml_name="square_flat_target"
+export detector_xml_name="planar_detector"
 export input_detector_file="${DETECTOR_PATH}/detectors/${detector_name}/merge.xml"
 
 export detector_pos_x=(0 -5 5) #(m)
 export detector_pos_y=(0 -5 5) #(m)
 export detector_pos_z=(0.5 0.5 0.5) #(m)
-export number_of_events=(100 100 100) # Events simulated in ddsim
+export number_of_events=(10 10 10) # Events simulated in ddsim
 
 export detector_pos_x_env="${detector_pos_x[@]}" # Export to string for Python
 export detector_pos_y_env="${detector_pos_y[@]}"

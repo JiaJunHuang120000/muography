@@ -36,11 +36,12 @@ For each time you start a new environment, please do ```source bash/setup_env.sh
 For running the scripts for multi-detectors, you will need to first change all of the parameters inside ```bash/config.sh``` to the desired options. Afterward, make a ```detector.xml``` file for the ```python/generate_soil_target.py``` to generate both the target world and the free-sky world for ```merge.xml``` to call and put it inside the ```xml/``` folder. Once finished, follow the steps below in ```~/muography``` directory
 ```
 source bash/setup_env.sh 
-soruce bash/config.sh
+source bash/config.sh
 
-cd $output_file_path
-python3 $DETECTOR_PATH/bash/config.sh/generate_soil_target.py $DETECTOR_PATH/python/soil_target.template.xml
-pyhton3 $DETECTOR_PATH/bash/config.sh/dd4hep_viz.py $detector_file_path/python/soil_target.xml
+cd $detector_file_path
+cp $DETECTOR_PATH/xml/soil_target.template.xml .
+cp $DETECTOR_PATH/xml/merge.xml .
+python3 $DETECTOR_PATH/python/generate_soil_target.py $detector_file_path/soil_target.template.xml
 cd $DETECTOR_PATH
 
 bash bash/multi.sh
@@ -53,7 +54,7 @@ python3 python/root_to_pkl_and_splitting.py
 
 ### Parameters for CRY
 
-1. ~~To change the area of muons hit at sea level, change the [subboxLength] in [setup.file] (units in m). This will create a 2d box of length^2.~~ This step has been updated to change the xy of the hepmc muon generation rather than CRY level generation for a more adoptive cahnge needed. Thus you will only need one large CRY output .txt file 
+1. To change the area of muons hit at sea level, change the [subboxLength] in [setup.file] (units in m). This will create a 2d box of length^2. Giving a large box will increase the rate of getting muons from CRY, small box will be very slow for large dataset of muons.
 3. To change the other parameters of the muon generation, you will need to either change the parameters inside [bash/gen_cry.sh] or in the terminal where you manualy enter the command in the above section.
 4. For the number of events taken from raw CRY output, change line 2 and the number [100] to desired number of events you need. You will need higher events than needed if you are applying a energy cut later, it is suggested you generate a large pool of events as a base events such you can grab later on.
 5. In line 6 is the rest of the parameters you can change in the process of CRY to hepmc, following the variables <input_file.txt> <output_file.hepmc> <muon_generation_height> <detector_position_x> <detector_position_y> <detector_position_z> <z_offset> <E_cut> <number_of_events>.
@@ -62,8 +63,8 @@ python3 python/root_to_pkl_and_splitting.py
    - <muon_generation_height> = height of the generate muons (m)
    - <detector_position_xyz> = xyz position of the center of the detector, where the muons will always cross (m)
    - <z_offset> = the z/2 length of the detector such that muons will be generate as a volumn that encovers the detector rather than a plane, this is a normal random distribution offset of the plane applied manualy in the code (m)
-   - <y_offset> = the y/2 length of the detector such that muons will be generate as a volumn that encovers the detector rather than a plane, this is a normal random distribution offset of the plane applied manualy in the code (m)
-   - <x_offset> = the x/2 length of the detector such that muons will be generate as a volumn that encovers the detector rather than a plane, this is a normal random distribution offset of the plane applied manualy in the code (m)
+   - <y_offset> = the y/2 length of the detector such that muons will be generate as a volumn that encovers the detector rather than a plane, this is a normal random distribution offset of the plane applied manualy in the code. Set to zero for [subboxLength] generation accounted for detector area. (m)
+   - <x_offset> = the x/2 length of the detector such that muons will be generate as a volumn that encovers the detector rather than a plane, this is a normal random distribution offset of the plane applied manualy in the code. Set to zero for [subboxLength] generation accounted for detector area. (m)
    - <E_cut> = the energy filtering of the raw CRY events, note it does not modify for energy but just filter for events from raw CRY output that passes (GeV)
    - <number_of_events> = number of events you want inside the output hepmc file, the number is based on the filtering so it may be less than expected.
 6. If you would like realistic comparison of the number of events at different height, you need to use the same <number_of_events> with different <E_cut> (height/2) for comparison.

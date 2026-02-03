@@ -19,7 +19,7 @@ for j in $(seq 0 $(( ${#world_configurations[@]}-1))); do
             --inputFiles "${hepmc_file_path}/${detector_name}_${i}.hepmc" \
             --outputFile "${output_file_path}/${detector_name}_${world_configurations[$j]}_${i}.edm4hep.root" \
             --numberOfEvents ${number_of_events[$i]} \
-            --steeringFile "${DETECTOR_PATH}/steering.py"
+            --steeringFile "${DETECTOR_PATH}/python/steering.py"
     done
 done
 
