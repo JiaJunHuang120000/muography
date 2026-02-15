@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
+<lccdd><info name="world.xml" title="Template for detector setup" author="@JiaJunHuang120000" url="https://github.com/JiaJunHuang120000/muography" status="development" version="1.0"><comment /></info>
+    
+<detectors>
+    
+  <detector id="2000" name="RockWithCubeCutout" type="RockWithCubeCutout" vis="AnlGray" material="Rock">
+  <dimensions x="200.0*m" y="200.0*m" z="50.0*m" />
+  <position x="0*m" y="0*m" z="-25.0*m" />
+
+  <cube>
+    <dimensions x="0.5*m" y="0.5*m" z="1*m" />
+    <position x="Detector_x_pos" y="Detector_y_pos" z="Detector_z_pos" />
+  </cube>
+  
+
+    
+</detector>
+
+  
+
+</detectors></lccdd>
