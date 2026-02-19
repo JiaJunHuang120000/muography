@@ -165,50 +165,174 @@ class DetectorParser:
             'dimensions': dimensions,
             'position': {'x': 0, 'y': 0, 'z': 0}
         }
+        
+    def _voxelize_cube(x, y, z, dx, dy, dz, pixel_size):
+        """
+        Voxelize a cube centered at (x, y, z)
+    
+        dx, dy, dz are full lengths (DD4hep style)
+        pixel_size is voxel edge length
+        """
+    
+        hx = dx / 2.0
+        hy = dy / 2.0
+        hz = dz / 2.0
+    
+        xs = np.arange(x - hx + pixel_size / 2,
+                        x + hx,
+                        pixel_size)
+        ys = np.arange(y - hy + pixel_size / 2,
+                        y + hy,
+                        pixel_size)
+        zs = np.arange(z - hz + pixel_size / 2,
+                        z + hz,
+                        pixel_size)
+    
+        voxels = []
+        for xi in xs:
+            for yi in ys:
+                for zi in zs:
+                    voxels.append((xi, yi, zi))
+    
+        return voxels
+
+    def _voxelize_sphere(x, y, z, r, pixel_size):
+        """
+        Voxelize a sphere centered at (x, y, z)
+        """
+    
+        r2 = r * r
+        voxels = []
+    
+        xs = np.arange(x - r, x + r, pixel_size)
+        ys = np.arange(y - r, y + r, pixel_size)
+        zs = np.arange(z - r, z + r, pixel_size)
+    
+        for xi in xs:
+            for yi in ys:
+                for zi in zs:
+                    if (xi - x)**2 + (yi - y)**2 + (zi - z)**2 <= r2:
+                        voxels.append((xi, yi, zi))
+    
+        return voxels
     
     def _parse_detectors(self):
-        """Parse detector elements"""
-        detectors = []
-        
+        """
+        Parse detector elements into a flat list of volumes.
+    
+        Roles:
+          - base      : main world / solid detector volume
+          - cutout    : vacuum sub-geometry (carves material)
+          - overwrite : later solids that can replace vacuum
+        """
+    
+        volumes = []
+    
         detectors_elem = self.root.find('.//detectors')
         if detectors_elem is None:
-            return detectors
-        
+            return volumes
+    
         for det in detectors_elem.findall('detector'):
-            # Parse detector attributes
-            detector = {
-                'id': det.get('id', ''),
-                'name': det.get('name', ''),
-                'type': det.get('type', ''),
-                'material': det.get('material', ''),
-                'vis': det.get('vis', ''),
-                'position': {'x': 0, 'y': 0, 'z': 0},
-                'dimensions': {'x': 0, 'y': 0, 'z': 0}
-            }
-            
-            # Parse dimensions
+            det_id = int(det.get('id', 0))
+            det_name = det.get('name', '')
+            det_material = det.get('material', '')
+    
+            # ------------------------------------------------------------
+            # Helper: resolve constants + units
+            # ------------------------------------------------------------
+            def resolve(value):
+                for const_name, const_value in self.constants.items():
+                    value = value.replace(const_name, str(const_value))
+                return parse_dd4hep_constant(value)
+    
+            # ------------------------------------------------------------
+            # Parse main detector volume (world or solid)
+            # ------------------------------------------------------------
             dims = det.find('dimensions')
-            if dims is not None:
-                for dim in ['x', 'y', 'z']:
-                    value = dims.get(dim, '0')
-                    # Replace constants
-                    for const_name, const_value in self.constants.items():
-                        value = value.replace(const_name, str(const_value))
-                    detector['dimensions'][dim] = parse_dd4hep_constant(value)
-            
-            # Parse position
             pos = det.find('position')
-            if pos is not None:
-                for axis in ['x', 'y', 'z']:
-                    value = pos.get(axis, '0')
-                    # Replace constants
-                    for const_name, const_value in self.constants.items():
-                        value = value.replace(const_name, str(const_value))
-                    detector['position'][axis] = parse_dd4hep_constant(value)
-            
-            detectors.append(detector)
-        
-        return detectors
+    
+            if dims is not None:
+                role = "base" if det_id == 2000 else "overwrite"
+
+                main_volume = {
+                    "shape": "box",
+                    "dimensions": {
+                        "x": resolve(dims.get('x', '0')),
+                        "y": resolve(dims.get('y', '0')),
+                        "z": resolve(dims.get('z', '0')),
+                    },
+                    "position": {
+                        "x": resolve(pos.get('x', '0')) if pos is not None else 0.0,
+                        "y": resolve(pos.get('y', '0')) if pos is not None else 0.0,
+                        "z": resolve(pos.get('z', '0')) if pos is not None else 0.0,
+                    },
+                    "material": det_material,
+                    "role": role,
+                    "detector_id": det_id,
+                    "detector_name": det_name,
+                }
+    
+                volumes.append(main_volume)
+    
+            # ------------------------------------------------------------
+            # Determine detector role
+            # ------------------------------------------------------------
+            if det_id == 2000 and det_name == "RockWithCubeCutout":
+                sub_role = "cutout"
+                sub_material = "Vacuum"
+            else:
+                sub_role = "overwrite"
+                sub_material = det_material
+    
+            # ------------------------------------------------------------
+            # Parse cube sub-geometries
+            # ------------------------------------------------------------
+            for cube in det.findall('cube'):
+                dims = cube.find('dimensions')
+                pos = cube.find('position')
+    
+                volumes.append({
+                    "shape": "box",
+                    "dimensions": {
+                        "x": resolve(dims.get('x', '0')),
+                        "y": resolve(dims.get('y', '0')),
+                        "z": resolve(dims.get('z', '0')),
+                    },
+                    "position": {
+                        "x": resolve(pos.get('x', '0')),
+                        "y": resolve(pos.get('y', '0')),
+                        "z": resolve(pos.get('z', '0')),
+                    },
+                    "material": sub_material,
+                    "role": sub_role,
+                    "detector_id": det_id,
+                    "detector_name": det_name,
+                })
+    
+            # ------------------------------------------------------------
+            # Parse sphere sub-geometries
+            # ------------------------------------------------------------
+            for sphere in det.findall('sphere'):
+                dims = sphere.find('dimensions')
+                pos = sphere.find('position')
+    
+                volumes.append({
+                    "shape": "sphere",
+                    "dimensions": {
+                        "r": resolve(dims.get('r', '0')),
+                    },
+                    "position": {
+                        "x": resolve(pos.get('x', '0')),
+                        "y": resolve(pos.get('y', '0')),
+                        "z": resolve(pos.get('z', '0')),
+                    },
+                    "material": sub_material,
+                    "role": sub_role,
+                    "detector_id": det_id,
+                    "detector_name": det_name,
+                })
+    
+        return volumes
     
     def print_summary(self):
         """Print summary of the geometry"""
@@ -229,11 +353,14 @@ class DetectorParser:
         
         print(f"\n🔬 Detectors ({len(self.detectors)}):")
         for det in self.detectors:
-            print(f"  - {det['name']} (ID: {det['id']}, Type: {det['type']})")
+            print(f"  - {det['detector_name']} (ID: {det['detector_id']}, Type: {det['material']})")
             print(f"    Position: ({det['position']['x']:.1f}, "
                   f"{det['position']['y']:.1f}, {det['position']['z']:.1f}) mm")
-            print(f"    Size: {det['dimensions']['x']:.1f} × "
+            if det['shape'] == 'box':
+                print(f"    Size: {det['dimensions']['x']:.1f} × "
                   f"{det['dimensions']['y']:.1f} × {det['dimensions']['z']:.1f} mm")
+            elif det['shape'] == 'sphere':
+                print(f"    Size: {det['dimensions']['r']:.1f} mm")
             print(f"    Material: {det['material']}")
     
     def visualize_2d(self):
@@ -342,7 +469,7 @@ class DetectorParser:
             
             # Plot center point
             ax.scatter([x], [y], [z], color=color, s=50, alpha=0.8,
-                      label=f"{det['name']} ({det['material']})" if det == self.detectors[0] else "")
+                      label=f"{det['detector_name']} ({det['material']})" if det == self.detectors[0] else "")
         
         ax.set_xlabel('X (mm)')
         ax.set_ylabel('Y (mm)')
@@ -377,7 +504,49 @@ class Voxelizer:
             'Copper': 8.96,
             'Aluminum': 2.70,
             'Tungsten': 19.25,
+            'Rock': 2.6,
         }
+
+    def _fill_volume(self, voxel_grid, det, bbox, force_density=None):
+        pos = det['position']
+        dims = det['dimensions']
+        material = det['material']
+    
+        density = (
+            force_density
+            if force_density is not None
+            else self.material_densities.get(material, 1.0)
+        )
+    
+        det_min_x = pos['x'] - dims.get('x', 0)/2
+        det_max_x = pos['x'] + dims.get('x', 0)/2
+        det_min_y = pos['y'] - dims.get('y', 0)/2
+        det_max_y = pos['y'] + dims.get('y', 0)/2
+        det_min_z = pos['z'] - dims.get('z', 0)/2
+        det_max_z = pos['z'] + dims.get('z', 0)/2
+    
+        range_x = bbox['x_max'] - bbox['x_min']
+        range_y = bbox['y_max'] - bbox['y_min']
+        range_z = bbox['z_max'] - bbox['z_min']
+    
+        i_min = int((det_min_x - bbox['x_min']) / range_x * self.resolution)
+        i_max = int((det_max_x - bbox['x_min']) / range_x * self.resolution)
+        j_min = int((det_min_y - bbox['y_min']) / range_y * self.resolution)
+        j_max = int((det_max_y - bbox['y_min']) / range_y * self.resolution)
+        k_min = int((det_min_z - bbox['z_min']) / range_z * self.resolution)
+        k_max = int((det_max_z - bbox['z_min']) / range_z * self.resolution)
+    
+        i_min = max(0, i_min)
+        i_max = min(self.resolution-1, i_max)
+        j_min = max(0, j_min)
+        j_max = min(self.resolution-1, j_max)
+        k_min = max(0, k_min)
+        k_max = min(self.resolution-1, k_max)
+    
+        voxel_grid[i_min:i_max+1, j_min:j_max+1, k_min:k_max+1] = density
+
+
+        
     def create_voxel_grid(self):
         """Create voxel grid from the geometry - FIXED VERSION"""
         if not self.parser.detectors:
@@ -410,61 +579,44 @@ class Voxelizer:
         voxel_size_x = (bbox['x_max'] - bbox['x_min']) / self.resolution
         voxel_size_y = (bbox['y_max'] - bbox['y_min']) / self.resolution
         voxel_size_z = (bbox['z_max'] - bbox['z_min']) / self.resolution
+
+        xs = np.linspace(
+            bbox['x_min'] + voxel_size_x / 2,
+            bbox['x_max'] - voxel_size_x / 2,
+            self.resolution,
+        )
+        ys = np.linspace(
+            bbox['y_min'] + voxel_size_y / 2,
+            bbox['y_max'] - voxel_size_y / 2,
+            self.resolution,
+        )
+        zs = np.linspace(
+            bbox['z_min'] + voxel_size_z / 2,
+            bbox['z_max'] - voxel_size_z / 2,
+            self.resolution,
+        )
+    
+        voxel_coords = np.stack(
+            np.meshgrid(xs, ys, zs, indexing="ij"),
+            axis=-1,
+        )
         
         print(f"\n📐 Voxel size: {voxel_size_x:.1f} × {voxel_size_y:.1f} × {voxel_size_z:.1f} mm")
         print(f"   Total voxels: {self.resolution**3:,}")
         
         # Voxelize each detector
-        for det in self.parser.detectors:
-            pos = det['position']
-            dims = det['dimensions']
-            material = det['material']
-            
-            # Get density for this material
-            density = self.material_densities.get(material, 1.0)
-            
-            # Convert position and dimensions from your XML:
-            # Position: x="8*cm" = 80mm, z="50*cm" = 500mm
-            # Dimensions: x="10*cm" = 100mm, etc.
-            
-            # Calculate detector bounds in mm
-            det_min_x = pos['x'] - dims['x']/2
-            det_max_x = pos['x'] + dims['x']/2
-            det_min_y = pos['y'] - dims['y']/2
-            det_max_y = pos['y'] + dims['y']/2
-            det_min_z = pos['z'] - dims['z']/2
-            det_max_z = pos['z'] + dims['z']/2
-            
-            # Convert to voxel indices
-            range_x = bbox['x_max'] - bbox['x_min']
-            range_y = bbox['y_max'] - bbox['y_min']
-            range_z = bbox['z_max'] - bbox['z_min']
-            
-            i_min = int((det_min_x - bbox['x_min']) / range_x * self.resolution)
-            i_max = int((det_max_x - bbox['x_min']) / range_x * self.resolution)
-            j_min = int((det_min_y - bbox['y_min']) / range_y * self.resolution)
-            j_max = int((det_max_y - bbox['y_min']) / range_y * self.resolution)
-            k_min = int((det_min_z - bbox['z_min']) / range_z * self.resolution)
-            k_max = int((det_max_z - bbox['z_min']) / range_z * self.resolution)
-            
-            # Clamp indices
-            i_min = max(0, i_min)
-            i_max = min(self.resolution-1, i_max)
-            j_min = max(0, j_min)
-            j_max = min(self.resolution-1, j_max)
-            k_min = max(0, k_min)
-            k_max = min(self.resolution-1, k_max)
-            
-            # Fill the detector volume
-            for i in range(i_min, i_max+1):
-                for j in range(j_min, j_max+1):
-                    for k in range(k_min, k_max+1):
-                        voxel_grid[i, j, k] = density
-            
-            print(f"   Voxelized {det['name']}: "
-                  f"[{i_min}:{i_max}, {j_min}:{j_max}, {k_min}:{k_max}]")
+        for det in filter(lambda d: d['role'] == 'base', self.parser.detectors):
+            self._fill_volume(voxel_grid, det, bbox)
         
-        return voxel_grid, bbox
+        # 2️⃣ Cutouts (vacuum always wins over base)
+        for det in filter(lambda d: d['role'] == 'cutout', self.parser.detectors):
+            self._fill_volume(voxel_grid, det, bbox, force_density=0.0)
+        
+        # 3️⃣ Overwrites (solid replaces vacuum)
+        for det in filter(lambda d: d['role'] == 'overwrite', self.parser.detectors):
+            self._fill_volume(voxel_grid, det, bbox)
+        
+        return voxel_grid, voxel_coords, bbox
     
     def plot_voxel_slices(self, voxel_grid):
         """Plot slices through the voxel grid"""
@@ -523,15 +675,18 @@ class Voxelizer:
         return i, j, k
 
         
-    def save_results(self, voxel_grid, bbox, prefix='_Detector'):
+    def save_results(self, voxel_grid, voxel_coords, bbox, prefix='_Detector'):
         """Save voxel grid and metadata"""
         # Save voxel grid
         voxel_file = f'{prefix}_voxels.npy'
-        np.save(voxel_file, voxel_grid)
+        #np.save(voxel_file, voxel_grid)
 
         voxel_file_pkl = f'{prefix}_voxels.pkl'
         with open(voxel_file_pkl, 'wb') as f:
             pickle.dump(voxel_grid, f)
+
+        with open(f"{prefix}_voxel_coords.pkl", "wb") as f:
+            pickle.dump(voxel_coords, f)
             
         # ---- read detectors from config.sh (text parsing) ----
         detectors = read_detectors_from_config_file()
@@ -592,11 +747,14 @@ class Voxelizer:
             
             f.write(f"Targets:\n")
             for det in self.parser.detectors:
-                f.write(f"  - {det['name']} ({det['material']}):\n")
+                f.write(f"  - {det['detector_name']} ({det['material']}) ({det['role']}):\n")
                 f.write(f"    Position: ({det['position']['x']:.1f}, "
                        f"{det['position']['y']:.1f}, {det['position']['z']:.1f}) mm\n")
-                f.write(f"    Size: {det['dimensions']['x']:.1f} × "
-                       f"{det['dimensions']['y']:.1f} × {det['dimensions']['z']:.1f} mm\n")
+                if det['shape'] == 'box':
+                    f.write(f"    Size: {det['dimensions']['x']:.1f} × "
+                           f"{det['dimensions']['y']:.1f} × {det['dimensions']['z']:.1f} mm\n")
+                elif det['shape'] == 'sphere':
+                    f.write(f"    Size: {det['dimensions']['r']:.1f} mm\n")
 
             f.write("\nDetector positions (from config.sh):\n")
             f.write("=" * 50 + "\n")
@@ -685,14 +843,14 @@ def main():
             voxelizer = Voxelizer(parser, resolution=resolution)
             
             # Create voxel grid
-            voxel_grid, bbox = voxelizer.create_voxel_grid()
+            voxel_grid, voxel_coords, bbox = voxelizer.create_voxel_grid()
             
             # Plot slices
             voxelizer.plot_voxel_slices(voxel_grid)
             
             # Save results
             prefix = os.path.splitext(os.path.basename(xml_file))[0]
-            voxelizer.save_results(voxel_grid, bbox, prefix=prefix)
+            voxelizer.save_results(voxel_grid, voxel_coords, bbox, prefix=prefix)
         
         if choice == '5':
             print("\n👋 Goodbye!")

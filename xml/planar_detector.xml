@@ -12,6 +12,7 @@
 <!-- Standard environmental conditions: 20 °C, 1 atm -->
 <std_conditions type="NTP"/>
 
+    
 <includes>
     <gdmlFile ref="${DD4hepINSTALL}/DDDetectors/compact/elements.xml"/>
     <gdmlFile ref="${DETECTOR_PATH}/compact/materials.xml"/>
@@ -33,7 +34,7 @@
     <constant name="Detector_angle" value="90*deg"/>
     
     <constant name="Separation" value="5*cm"/>
-    <constant name="Distance" value="10*cm"/>
+    <constant name="Distance" value="25*cm"/>
       
   </define>
     
@@ -45,7 +46,7 @@
       readout="MuographyHits"
       vis="InvisibleWithDaughters"
     >
-      <position x="Detector_x_pos"         y="Detector_y_pos"         z="Detector_z_pos"/>
+      <position x="Detector_x_pos"         y="Detector_y_pos+2.44*cm"         z="Detector_z_pos"/>
       <rotation x="Detector_rotateX_angle" y="Detector_rotateY_angle" z="Detector_rotateZ_angle"/>
       <dimensions
         x="Detector_PolystyreneWidth"
@@ -65,7 +66,7 @@
       readout="MuographyHits"
       vis="InvisibleWithDaughters"
     >
-      <position x="Detector_x_pos+Separation*1"         y="Detector_y_pos"         z="Detector_z_pos"/>
+      <position x="Detector_x_pos+Separation*1"         y="Detector_y_pos+2.44*cm"         z="Detector_z_pos"/>
       <rotation x="Detector_rotateX_angle" y="Detector_rotateY_angle" z="Detector_rotateZ_angle"/>
       <dimensions
         x="Detector_PolystyreneWidth"
@@ -86,7 +87,7 @@
       readout="MuographyHits"
       vis="InvisibleWithDaughters"
     >
-      <position x="Detector_x_pos+Separation*2"         y="Detector_y_pos"         z="Detector_z_pos"/>
+      <position x="Detector_x_pos+Separation*2"         y="Detector_y_pos+2.44*cm"         z="Detector_z_pos"/>
       <rotation x="Detector_rotateX_angle" y="Detector_rotateY_angle" z="Detector_rotateZ_angle"/>
       <dimensions
         x="Detector_PolystyreneWidth"
@@ -107,7 +108,7 @@
       readout="MuographyHits"
       vis="InvisibleWithDaughters"
     >
-      <position x="Detector_x_pos+Separation*3"         y="Detector_y_pos"         z="Detector_z_pos"/>
+      <position x="Detector_x_pos+Separation*3"         y="Detector_y_pos+2.44*cm"         z="Detector_z_pos"/>
       <rotation x="Detector_rotateX_angle" y="Detector_rotateY_angle" z="Detector_rotateZ_angle"/>
       <dimensions
         x="Detector_PolystyreneWidth"
