@@ -3,7 +3,9 @@
     <gdmlFile ref="${DD4hepINSTALL}/DDDetectors/compact/elements.xml"/>
     <gdmlFile ref="${DETECTOR_PATH}/compact/materials.xml"/>
   </includes>
-    
+  <display>
+    <include ref="${DETECTOR_PATH}/compact/colors.xml" />
+  </display>
   <define>
     <documentation>
       ## World volume

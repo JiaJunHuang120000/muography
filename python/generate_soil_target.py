@@ -1,5 +1,6 @@
 import subprocess
 from pathlib import Path
+import os
 
 # Load TARGETS from config.sh
 cmd = ["bash", "-c", "source $DETECTOR_PATH/bash/config.sh && printf '%s\n' \"${TARGETS[@]}\""]
@@ -9,6 +10,25 @@ xml_blocks = []
 xml_blocks1 = []
 
 template = Path("soil_target.template.xml").read_text()
+
+world_bottom_material=os.getenv('world_bottom_material')
+world_side=float(os.getenv('world_area'))
+world_dx=world_side
+world_dy=world_side
+world_dz=float(os.getenv('world_depth'))
+
+world_bottom = f"""<detector id="2000" name="RockWithCubeCutout" type="RockWithCubeCutout" vis="AnlGray" material="{world_bottom_material}">
+  <dimensions x="{world_dx}*m" y="{world_dy}*m" z="{world_dz}*m" />
+  <position x="0*m" y="0*m" z="-{world_dz/2}*m" />
+
+  <cube>
+    <dimensions x="0.5*m" y="0.5*m" z="1*m" />
+    <position x="Detector_x_pos" y="Detector_y_pos" z="Detector_z_pos" />
+  </cube>
+  
+"""
+
+xml_blocks.append(world_bottom)
 
 # Inject geometry
 final_xml = template.replace("{{TARGETS}}", "".join(xml_blocks))

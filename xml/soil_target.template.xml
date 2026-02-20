@@ -1,29 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <lccdd><info name="world.xml" title="Template for detector setup" author="@JiaJunHuang120000" url="https://github.com/JiaJunHuang120000/muography" status="development" version="1.0"><comment /></info>
-
-<includes>
-    <gdmlFile ref="${DD4hepINSTALL}/DDDetectors/compact/elements.xml" />
-    <gdmlFile ref="${DETECTOR_PATH}/compact/materials.xml" />
-</includes>
-
-  <display>
-    <include ref="${DETECTOR_PATH}/compact/colors.xml" />
-  </display>
-
-  <define>
-    <constant name="Pi" value="3.14159265359" />
-    <constant name="mil" value="0.0254*mm" />
-    <constant name="inch" value="2.54*cm" />
-  </define>
-
-<detectors><detector id="2000" name="RockWithCubeCutout" type="RockWithCubeCutout" vis="AnlGray" material="${world_bottom_material}">
-  <dimensions x="world_dx" y="world_dy" z="world_dz" />
-  <position x="0" y="0" z="-world_dz/2" />
-
-  <cube>
-    <dimensions x="0.5*m" y="0.5*m" z="1*m" />
-    <position x="Detector_x_pos" y="Detector_y_pos" z="Detector_z_pos" />
-  </cube>
+    
+<detectors>
     
   {{TARGETS}}
     
