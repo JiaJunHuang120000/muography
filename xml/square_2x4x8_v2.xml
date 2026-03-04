@@ -9,24 +9,12 @@
         version="1.0"
         ><comment/></info>
 <!-- Standard environmental conditions: 20 °C, 1 atm -->
-<std_conditions type="NTP"/>
-
-<includes>
-    <gdmlFile ref="${DD4hepINSTALL}/DDDetectors/compact/elements.xml"/>
-    <gdmlFile ref="${DETECTOR_PATH}/compact/materials.xml"/>
-</includes>
-
-  <display>
-    <include ref="${DETECTOR_PATH}/compact/colors.xml"/>
-  </display>
-
+    
   <define>
     <constant name="Pi" value="3.14159265359"/>
     <constant name="mil" value="0.0254*mm"/>
     <constant name="inch" value="2.54*cm"/>
   </define>
-
-
 
   <define>
     <documentation>
@@ -58,7 +46,7 @@
       readout="MuographyHits"
       vis="InvisibleWithDaughters"
     >
-      <position x="Detector_x_pos+Detector_radius*sin(Detector_angle*0+45*deg)"         y="Detector_y_pos+Detector_radius*sin(Detector_angle*0+45*deg)"         z="Detector_z_pos-1.22*cm+Detector_length/2+4.88*cm+1.5*cm"/>
+      <position x="Detector_x_pos+Detector_radius*sin(Detector_angle*0+45*deg)"         y="Detector_y_pos+Detector_radius*sin(Detector_angle*0+45*deg)"         z="Detector_z_pos-1.22*cm+Detector_length/2+4.88*cm+5*cm"/>
       <rotation x="Detector_rotateX_angle" y="Detector_rotateY_angle" z="Detector_rotateZ_angle-Detector_angle*0-45*deg"/>
       <dimensions
         x="Detector_PolystyreneWidth"
@@ -78,7 +66,7 @@
       readout="MuographyHits"
       vis="InvisibleWithDaughters"
     >
-      <position x="Detector_x_pos+Detector_radius*sin(Detector_angle*1+45*deg)"         y="Detector_y_pos+Detector_radius*sin(Detector_angle*1+45*deg)"         z="Detector_z_pos-2.44*cm+Detector_length/2+4.88*cm+1.5*cm"/>
+      <position x="Detector_x_pos+Detector_radius*sin(Detector_angle*1+45*deg)"         y="Detector_y_pos+Detector_radius*cos(Detector_angle*1+45*deg)"         z="Detector_z_pos-2.44*cm+Detector_length/2+4.88*cm+5*cm"/>
       <rotation x="Detector_rotateX_angle" y="Detector_rotateY_angle" z="Detector_rotateZ_angle-Detector_angle*1-45*deg"/>
       <dimensions
         x="Detector_PolystyreneWidth"
@@ -99,7 +87,7 @@
       readout="MuographyHits"
       vis="InvisibleWithDaughters"
     >
-      <position x="Detector_x_pos+Detector_radius*sin(Detector_angle*2+45*deg)"         y="Detector_y_pos+Detector_radius*sin(Detector_angle*2+45*deg)"         z="Detector_z_pos-3.66*cm+Detector_length/2+4.88*cm+1.5*cm"/>
+      <position x="Detector_x_pos+Detector_radius*sin(Detector_angle*2+45*deg)"         y="Detector_y_pos+Detector_radius*cos(Detector_angle*2+45*deg)"         z="Detector_z_pos-3.66*cm+Detector_length/2+4.88*cm+5*cm"/>
       <rotation x="Detector_rotateX_angle" y="Detector_rotateY_angle" z="Detector_rotateZ_angle-Detector_angle*2-45*deg"/>
       <dimensions
         x="Detector_PolystyreneWidth"
@@ -120,7 +108,7 @@
       readout="MuographyHits"
       vis="InvisibleWithDaughters"
     >
-      <position x="Detector_x_pos+Detector_radius*sin(Detector_angle*3+45*deg)"         y="Detector_y_pos+Detector_radius*sin(Detector_angle*3+45*deg)"         z="Detector_z_pos-4.88*cm+Detector_length/2+4.88*cm+1.5*cm"/>
+      <position x="Detector_x_pos+Detector_radius*sin(Detector_angle*3+45*deg)"         y="Detector_y_pos+Detector_radius*cos(Detector_angle*3+45*deg)"         z="Detector_z_pos-4.88*cm+Detector_length/2+4.88*cm+5*cm"/>
       <rotation x="Detector_rotateX_angle" y="Detector_rotateY_angle" z="Detector_rotateZ_angle-Detector_angle*3-45*deg"/>
       <dimensions
         x="Detector_PolystyreneWidth"
@@ -142,7 +130,7 @@
       readout="MuographyHits"
       vis="InvisibleWithDaughters"
     >
-      <position x="Detector_x_pos+Detector_radius*sin(Detector_angle*0)"         y="Detector_y_pos+Detector_radius*sin(Detector_angle*0)"         z="Detector_z_pos-1.22*cm-Detector_length/2-1.5*cm"/>
+      <position x="Detector_x_pos+Detector_radius*sin(Detector_angle*0)"         y="Detector_y_pos+Detector_radius*cos(Detector_angle*0)"         z="Detector_z_pos-1.22*cm-Detector_length/2-5*cm"/>
       <rotation x="Detector_rotateX_angle" y="Detector_rotateY_angle" z="Detector_rotateZ_angle-Detector_angle*0"/>
       <dimensions
         x="Detector_PolystyreneWidth"
@@ -162,7 +150,7 @@
       readout="MuographyHits"
       vis="InvisibleWithDaughters"
     >
-      <position x="Detector_x_pos+Detector_radius*sin(Detector_angle*1)"         y="Detector_y_pos+Detector_radius*sin(Detector_angle*1)"         z="Detector_z_pos-2.44*cm-Detector_length/2-1.5*cm"/>
+      <position x="Detector_x_pos+Detector_radius*sin(Detector_angle*1)"         y="Detector_y_pos+Detector_radius*cos(Detector_angle*1)"         z="Detector_z_pos-2.44*cm-Detector_length/2-5*cm"/>
       <rotation x="Detector_rotateX_angle" y="Detector_rotateY_angle" z="Detector_rotateZ_angle-Detector_angle*1"/>
       <dimensions
         x="Detector_PolystyreneWidth"
@@ -183,7 +171,7 @@
       readout="MuographyHits"
       vis="InvisibleWithDaughters"
     >
-      <position x="Detector_x_pos+Detector_radius*sin(Detector_angle*2)"         y="Detector_y_pos+Detector_radius*sin(Detector_angle*2)"         z="Detector_z_pos-3.66*cm-Detector_length/2-1.5*cm"/>
+      <position x="Detector_x_pos+Detector_radius*sin(Detector_angle*2)"         y="Detector_y_pos+Detector_radius*cos(Detector_angle*2)"         z="Detector_z_pos-3.66*cm-Detector_length/2-5*cm"/>
       <rotation x="Detector_rotateX_angle" y="Detector_rotateY_angle" z="Detector_rotateZ_angle-Detector_angle*2"/>
       <dimensions
         x="Detector_PolystyreneWidth"
@@ -204,7 +192,7 @@
       readout="MuographyHits"
       vis="InvisibleWithDaughters"
     >
-      <position x="Detector_x_pos+Detector_radius*sin(Detector_angle*3)"         y="Detector_y_pos+Detector_radius*sin(Detector_angle*3)"         z="Detector_z_pos-4.88*cm-Detector_length/2-1.5*cm"/>
+      <position x="Detector_x_pos+Detector_radius*sin(Detector_angle*3)"         y="Detector_y_pos+Detector_radius*cos(Detector_angle*3)"         z="Detector_z_pos-4.88*cm-Detector_length/2-5*cm"/>
       <rotation x="Detector_rotateX_angle" y="Detector_rotateY_angle" z="Detector_rotateZ_angle-Detector_angle*3"/>
       <dimensions
         x="Detector_PolystyreneWidth"
