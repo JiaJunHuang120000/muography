@@ -1,5 +1,11 @@
 #!/bin/bash
-
+# Run DD4hep/DDG4 simulation for each detector position and world config.
+#
+# Reads arrays and paths from bash/config.sh, then loops over:
+# - CONFIG in {free, target}
+# - detector index i in [0, number_of_detector)
+#
+# Produces EDM4hep ROOT files under data/${detector_name}/.
 source ${DETECTOR_PATH}/bash/config.sh
 # Start measuring time for DDsim
 start=$(date +%s)

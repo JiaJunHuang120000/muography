@@ -1,4 +1,10 @@
 #!/bin/bash
+# Convert raw CRY text output into one HepMC file per detector position.
+#
+# Reads configuration from bash/config.sh and calls:
+#   ./remote <input_txt> <output_hepmc> ...
+#
+# Output files are written under hepmc/${detector_name}/.
 source ${DETECTOR_PATH}/bash/config.sh
 
 # Start measuring time

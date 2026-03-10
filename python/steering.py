@@ -1,3 +1,11 @@
+"""
+DD4hep/DDG4 steering configuration used by `ddsim`.
+
+This file sets defaults for detector actions, filters, magnetic field integration,
+and output behavior. It is passed from bash/iteration.sh using:
+    --steeringFile "$DETECTOR_PATH/python/steering.py"
+"""
+
 from DDSim.DD4hepSimulation import DD4hepSimulation
 from g4units import mm, GeV, MeV
 SIM = DD4hepSimulation()

@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 """
-Detector Visualizer & Voxelizer
-Specialized for the specific XML structure you provided
+Detector Visualizer & Voxelizer utility.
+
+Purpose:
+- Parse compact DD4hep-like XML files,
+- summarize detectors/world/constants,
+- create quick 2D/3D visual checks,
+- optionally voxelize geometry for downstream studies.
 """
 
 import xml.etree.ElementTree as ET

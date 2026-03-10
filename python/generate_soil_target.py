@@ -1,3 +1,14 @@
+"""
+Generate soil/world XML files from xml/soil_target.template.xml and TARGETS in bash/config.sh.
+
+Outputs (in current working directory):
+- soil_free.xml   : base rock with detector cutout only
+- soil_target.xml : base rock plus generated sphere/cube targets
+
+Typical usage (from detector folder created by config.sh):
+    python3 $DETECTOR_PATH/python/generate_soil_target.py soil_target.template.xml
+"""
+
 import subprocess
 from pathlib import Path
 
