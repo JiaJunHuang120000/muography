@@ -1,5 +1,16 @@
 #!/bin/bash
-
+# Central runtime configuration for the muography pipeline.
+#
+# Usage:
+#   source bash/setup_env.sh
+#   source bash/config.sh
+#
+# This file defines:
+# - detector scan positions and event counts,
+# - CRY->HepMC conversion parameters,
+# - world/target geometry parameters used for XML generation.
+#
+# Edit this file first when customizing a study.
 export number_of_detector=3
 export detector_name='planar_detector'
 export output_file_path="${DETECTOR_PATH}/data/${detector_name}"

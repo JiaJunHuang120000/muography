@@ -1,3 +1,10 @@
+#!/bin/bash
+# Download and build HepMC3 locally.
+#
+# Install prefix:
+#   ./hepmc3-install
+#
+# This is required by cpp/remote.cxx.
 wget http://hepmc.web.cern.ch/hepmc/releases/HepMC3-3.2.6.tar.gz
 tar -xzf HepMC3-3.2.6.tar.gz
 mkdir hepmc3-build

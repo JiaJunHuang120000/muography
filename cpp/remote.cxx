@@ -1,3 +1,15 @@
+// Convert CRY text events into HepMC3 events for DD4hep simulation.
+//
+// Usage:
+//   ./remote <input_file.txt> <output_file.hepmc> <muon_generation_height>
+//            <detector_position_x> <detector_position_y> <detector_position_z>
+//            <z_offset> <y_offset> <x_offset> <E_cut> <max_events>
+//
+// Notes:
+// - Input energy from CRY is kinetic energy in MeV.
+// - Output HepMC uses GeV and mm units.
+// - Events are filtered to muons and optional energy cut.
+
 #include "HepMC3/GenEvent.h"
 #include "HepMC3/WriterAscii.h"
 #include "HepMC3/Print.h"

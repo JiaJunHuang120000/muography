@@ -1,3 +1,16 @@
+"""
+Post-process DD4hep EDM4hep ROOT outputs into analysis-friendly datasets.
+
+Pipeline performed by this script:
+1) Load all detector ROOT files for free and target configurations.
+2) Reconstruct track angles from hit coordinates.
+3) Apply configurable smearing/noise steps.
+4) Save merged pandas/awkward-derived pickle outputs.
+5) Save split ROOT chunks for batched downstream processing.
+
+Expected environment variables are provided by bash/config.sh.
+"""
+
 import numpy as np, uproot as ur, awkward as ak, pandas as pd
 import matplotlib.pyplot as plt
 import os, sys

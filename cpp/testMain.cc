@@ -1,3 +1,13 @@
+/*
+ * CRY driver program used by this repository to generate raw cosmic-ray text.
+ *
+ * Usage:
+ *   ./testMain <setup.file> <N events>
+ *
+ * Output:
+ *   Human-readable lines describing secondaries, consumed later by cpp/remote.cxx.
+ */
+
 /* 
 
 Copyright (c) 2007-2012, The Regents of the University of California. 

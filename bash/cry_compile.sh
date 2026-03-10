@@ -1,3 +1,11 @@
+#!/bin/bash
+# Build CRY and compile the local C++ tools used by this repository.
+#
+# Outputs:
+# - cry_v1.7/ (CRY source/build)
+# - remote executable at repo root (CRY text -> HepMC3 converter)
+#
+# Run once during first-time setup.
 wget https://nuclear.llnl.gov/simulation/cry_v1.7.tar.gz
 tar -xvzf cry_v1.7.tar.gz
 rm cry_v1.7.tar.gz
