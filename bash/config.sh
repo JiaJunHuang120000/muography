@@ -12,7 +12,7 @@
 #
 # Edit this file first when customizing a study.
 export number_of_detector=3
-export detector_name='planar_detector'
+export detector_name='planar_detector_test'
 export output_file_path="${DETECTOR_PATH}/data/${detector_name}"
 export hepmc_file_path="${DETECTOR_PATH}/hepmc/${detector_name}"
 export detector_file_path="${DETECTOR_PATH}/detectors/${detector_name}"
