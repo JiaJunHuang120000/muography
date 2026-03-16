@@ -81,7 +81,7 @@ bash bash/multi.sh
 # Run ddsim for both world configs (free + target)
 bash bash/iteration.sh
 
-# Build merged PKL outputs and split ROOT chunks
+# Build merged PKL outputs and split ROOT chunks, if this step fails, might indicate no muon tracks reconstructed.
 python3 python/root_to_pkl_and_splitting.py
 ```
 
