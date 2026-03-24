@@ -24,13 +24,18 @@ static Ref_t createDetector(Detector& desc, xml_h handle, SensitiveDetector /*se
   xml_dim_t rot = detElem.rotation(); // Rotation if needed
 
   // Default material
-  Material air = desc.material("CarbonFiber_25percent");
+  std::string matName = "Air";  // default fallback
+  if (detElem.hasAttr(_Unicode(material))) {
+    matName = detElem.attr<std::string>(_Unicode(material));
+  }
+
+  Material material = desc.material(matName);
 
   // Define a simple sphere
   Sphere sphere(0.0, radius, 0.0, M_PI, 0.0, 2.0 * M_PI);
 
   // Create volume for sphere
-  Volume sphereVol(detName, sphere, air);
+  Volume sphereVol(detName, sphere, material);
 
   // Apply attributes from XML
   sphereVol.setAttributes(desc, detElem.regionStr(), detElem.limitsStr(), detElem.visStr());
