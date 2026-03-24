@@ -11,6 +11,6 @@ cd cry_v1.7/test/
 
 cd ../..
 mkdir -p hepmc
-./remote hepmc/output.txt hepmc/output.hepmc 10 0 0 0 0 0 0 0 1000
+./remote hepmc/output.txt hepmc/output.hepmc 10 0 0 0 0 0 0 0 10000
 #rm cry_v1.7/test/output.txt
 
