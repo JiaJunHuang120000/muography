@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<lccdd><info name="world.xml" title="Template for detector setup" author="@JiaJunHuang120000" url="https://github.com/JiaJunHuang120000/muography" status="development" version="1.0"><comment /></info>
+    
+<detectors>
+    
+  {{TARGETS}}
+    
+</detector>
+
+  {{TARGETS1}}
+
+</detectors></lccdd>
