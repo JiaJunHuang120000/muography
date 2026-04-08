@@ -1,14 +1,3 @@
-"""
-Generate soil/world XML files from xml/soil_target.template.xml and TARGETS in bash/config.sh.
-
-Outputs (in current working directory):
-- soil_free.xml   : base rock with detector cutout only
-- soil_target.xml : base rock plus generated sphere/cube targets
-
-Typical usage (from detector folder created by config.sh):
-    python3 $DETECTOR_PATH/python/generate_soil_target.py soil_target.template.xml
-"""
-
 import subprocess
 from pathlib import Path
 import os
@@ -31,10 +20,12 @@ world_dz=float(os.getenv('world_depth'))
 world_bottom = f"""<detector id="2000" name="RockWithCubeCutout" type="RockWithCubeCutout" vis="AnlGray" material="{world_bottom_material}">
   <dimensions x="{world_dx}*m" y="{world_dy}*m" z="{world_dz}*m" />
   <position x="0*m" y="0*m" z="-{world_dz/2}*m" />
+  <rotation x="0" y="0" z="0"  />
 
   <cube>
-    <dimensions x="0.5*m" y="0.5*m" z="1*m" />
+    <dimensions x="1*m" y="1*m" z="1*m" />
     <position x="Detector_x_pos" y="Detector_y_pos" z="Detector_z_pos" />
+    <rotation x="0" y="0" z="0"  />
   </cube>
   
 """
@@ -61,6 +52,7 @@ for line in lines:
   <sphere>
     <dimensions r="{params['r']}" />
     <position x="{params['x']}" y="{params['y']}" z="{params['z']}" />
+    <rotation x="0" y="0" z="0"  />
   </sphere>
 """
     elif shape == "cube":
@@ -68,6 +60,7 @@ for line in lines:
   <cube>
     <dimensions x="{params['xdim']}" y="{params['ydim']}" z="{params['zdim']}" />
     <position x="{params['x']}" y="{params['y']}" z="{params['z']}" />
+    <rotation x="{params['rx']}" y="{params['ry']}" z="{params['rz']}"  />
   </cube>
 """
     else:
@@ -100,6 +93,7 @@ for line in lines:
 <detector id="{2000+i}" name="ExtraCube{i}" type="RockWithCubeCutout" vis="AnlGray" material="{params['material']}">
     <dimensions x="{params['xdim']}" y="{params['ydim']}" z="{params['zdim']}" />
     <position x="{params['x']}" y="{params['y']}" z="{params['z']}" />
+    <rotation x="{params['rx']}" y="{params['ry']}" z="{params['rz']}"  />
 </detector> 
 """
         i += 1

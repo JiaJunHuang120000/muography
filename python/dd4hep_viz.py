@@ -1,12 +1,7 @@
 #!/usr/bin/env python3
 """
-Detector Visualizer & Voxelizer utility.
-
-Purpose:
-- Parse compact DD4hep-like XML files,
-- summarize detectors/world/constants,
-- create quick 2D/3D visual checks,
-- optionally voxelize geometry for downstream studies.
+Detector Visualizer & Voxelizer
+Specialized for the specific XML structure you provided
 """
 
 import xml.etree.ElementTree as ET
@@ -58,7 +53,32 @@ def parse_dd4hep_constant(value_str):
             return float(value_str)
         except:
             return 0
+            
+def rotate_points(points, rot):
+    """Apply ZYX rotation (in radians) to Nx3 points"""
+    rx, ry, rz = rot['x'], rot['y'], rot['z']
 
+    # Rotation matrices
+    Rx = np.array([
+        [1, 0, 0],
+        [0, np.cos(rx), -np.sin(rx)],
+        [0, np.sin(rx), np.cos(rx)]
+    ])
+
+    Ry = np.array([
+        [np.cos(ry), 0, np.sin(ry)],
+        [0, 1, 0],
+        [-np.sin(ry), 0, np.cos(ry)]
+    ])
+
+    Rz = np.array([
+        [np.cos(rz), -np.sin(rz), 0],
+        [np.sin(rz), np.cos(rz), 0],
+        [0, 0, 1]
+    ])
+
+    R = Rz @ Ry @ Rx
+    return points @ R.T
 
 def read_detectors_from_config_file():
     """
@@ -255,7 +275,8 @@ class DetectorParser:
             # ------------------------------------------------------------
             dims = det.find('dimensions')
             pos = det.find('position')
-    
+            rot = det.find('rotation')
+            
             if dims is not None:
                 role = "base" if det_id == 2000 else "overwrite"
 
@@ -270,6 +291,11 @@ class DetectorParser:
                         "x": resolve(pos.get('x', '0')) if pos is not None else 0.0,
                         "y": resolve(pos.get('y', '0')) if pos is not None else 0.0,
                         "z": resolve(pos.get('z', '0')) if pos is not None else 0.0,
+                    },
+                    "rotation": {
+                        "x": resolve(rot.get('x', '0')) if rot is not None else 0.0,
+                        "y": resolve(rot.get('y', '0')) if rot is not None else 0.0,
+                        "z": resolve(rot.get('z', '0')) if rot is not None else 0.0,
                     },
                     "material": det_material,
                     "role": role,
@@ -450,16 +476,7 @@ class DetectorParser:
             dx, dy, dz = dims['x'], dims['y'], dims['z']
             
             # Vertices of the box
-            vertices = np.array([
-                [x-dx/2, y-dy/2, z-dz/2],
-                [x+dx/2, y-dy/2, z-dz/2],
-                [x+dx/2, y+dy/2, z-dz/2],
-                [x-dx/2, y+dy/2, z-dz/2],
-                [x-dx/2, y-dy/2, z+dz/2],
-                [x+dx/2, y-dy/2, z+dz/2],
-                [x+dx/2, y+dy/2, z+dz/2],
-                [x-dx/2, y+dy/2, z+dz/2]
-            ])
+            vertices = rotate_points(vertices - np.array([x,y,z]), det['rotation']) + np.array([x,y,z])
             
             # Plot edges
             edges = [
@@ -510,11 +527,14 @@ class Voxelizer:
             'Aluminum': 2.70,
             'Tungsten': 19.25,
             'Rock': 2.6,
+            'CarbonFiber_25percent': 0.325,
         }
 
-    def _fill_volume(self, voxel_grid, det, bbox, force_density=None):
+    def _fill_volume(self, voxel_grid, det, voxel_coords, force_density=None):
         pos = det['position']
         dims = det['dimensions']
+        rot = det.get('rotation', {"x":0,"y":0,"z":0})
+        shape = det['shape']
         material = det['material']
     
         density = (
@@ -523,32 +543,34 @@ class Voxelizer:
             else self.material_densities.get(material, 1.0)
         )
     
-        det_min_x = pos['x'] - dims.get('x', 0)/2
-        det_max_x = pos['x'] + dims.get('x', 0)/2
-        det_min_y = pos['y'] - dims.get('y', 0)/2
-        det_max_y = pos['y'] + dims.get('y', 0)/2
-        det_min_z = pos['z'] - dims.get('z', 0)/2
-        det_max_z = pos['z'] + dims.get('z', 0)/2
+        # Shift coordinates into local frame
+        coords = voxel_coords - np.array([pos['x'], pos['y'], pos['z']])
     
-        range_x = bbox['x_max'] - bbox['x_min']
-        range_y = bbox['y_max'] - bbox['y_min']
-        range_z = bbox['z_max'] - bbox['z_min']
+        # Rotate into object frame (inverse rotation)
+        coords = rotate_points(coords.reshape(-1, 3), 
+                               {"x": -rot['x'], "y": -rot['y'], "z": -rot['z']})
+        coords = coords.reshape(voxel_coords.shape)
     
-        i_min = int((det_min_x - bbox['x_min']) / range_x * self.resolution)
-        i_max = int((det_max_x - bbox['x_min']) / range_x * self.resolution)
-        j_min = int((det_min_y - bbox['y_min']) / range_y * self.resolution)
-        j_max = int((det_max_y - bbox['y_min']) / range_y * self.resolution)
-        k_min = int((det_min_z - bbox['z_min']) / range_z * self.resolution)
-        k_max = int((det_max_z - bbox['z_min']) / range_z * self.resolution)
+        if shape == "box":
+            hx = dims['x'] / 2
+            hy = dims['y'] / 2
+            hz = dims['z'] / 2
     
-        i_min = max(0, i_min)
-        i_max = min(self.resolution-1, i_max)
-        j_min = max(0, j_min)
-        j_max = min(self.resolution-1, j_max)
-        k_min = max(0, k_min)
-        k_max = min(self.resolution-1, k_max)
+            mask = (
+                (np.abs(coords[...,0]) <= hx) &
+                (np.abs(coords[...,1]) <= hy) &
+                (np.abs(coords[...,2]) <= hz)
+            )
     
-        voxel_grid[i_min:i_max+1, j_min:j_max+1, k_min:k_max+1] = density
+        elif shape == "sphere":
+            r = dims['r']
+            mask = (
+                coords[...,0]**2 +
+                coords[...,1]**2 +
+                coords[...,2]**2
+            ) <= r**2
+    
+        voxel_grid[mask] = density
 
 
         
@@ -611,15 +633,15 @@ class Voxelizer:
         
         # Voxelize each detector
         for det in filter(lambda d: d['role'] == 'base', self.parser.detectors):
-            self._fill_volume(voxel_grid, det, bbox)
+            self._fill_volume(voxel_grid, det, voxel_coords)
         
         # 2️⃣ Cutouts (vacuum always wins over base)
         for det in filter(lambda d: d['role'] == 'cutout', self.parser.detectors):
-            self._fill_volume(voxel_grid, det, bbox, force_density=0.0)
+            self._fill_volume(voxel_grid, det, voxel_coords, force_density=0.0)
         
         # 3️⃣ Overwrites (solid replaces vacuum)
         for det in filter(lambda d: d['role'] == 'overwrite', self.parser.detectors):
-            self._fill_volume(voxel_grid, det, bbox)
+            self._fill_volume(voxel_grid, det, voxel_coords)
         
         return voxel_grid, voxel_coords, bbox
     
@@ -745,21 +767,24 @@ class Voxelizer:
             f.write(f"Total voxels: {voxel_grid.size:,}\n")
             f.write(f"Material voxels: {int(np.count_nonzero(voxel_grid)):,}\n")
             f.write(f"Empty voxels: {int(np.sum(voxel_grid == 0)):,}\n")
-            f.write(f"Bounding box (mm):\n")
-            f.write(f"  X: [{bbox['x_min']:.1f}, {bbox['x_max']:.1f}]\n")
-            f.write(f"  Y: [{bbox['y_min']:.1f}, {bbox['y_max']:.1f}]\n")
-            f.write(f"  Z: [{bbox['z_min']:.1f}, {bbox['z_max']:.1f}]\n\n")
+            f.write(f"Bounding box (m):\n")
+            f.write(f"  X: [{bbox['x_min']/1000:.1f}, {bbox['x_max']/1000:.1f}]\n")
+            f.write(f"  Y: [{bbox['y_min']/1000:.1f}, {bbox['y_max']/1000:.1f}]\n")
+            f.write(f"  Z: [{bbox['z_min']/1000:.1f}, {bbox['z_max']/1000:.1f}]\n\n")
             
             f.write(f"Targets:\n")
             for det in self.parser.detectors:
+                rot = det.get('rotation', {"x":0,"y":0,"z":0})
                 f.write(f"  - {det['detector_name']} ({det['material']}) ({det['role']}):\n")
-                f.write(f"    Position: ({det['position']['x']:.1f}, "
-                       f"{det['position']['y']:.1f}, {det['position']['z']:.1f}) mm\n")
+                f.write(f"    Position: ({det['position']['x']/1000:.1f}, "
+                       f"{det['position']['y']/1000:.1f}, {det['position']['z']/1000:.1f}) m\n")
+                f.write(f"    Rotation: ({rot['x']:.3f}, "
+                       f"{rot['y']:.3f}, {rot['z']:.3f}) rad\n")
                 if det['shape'] == 'box':
-                    f.write(f"    Size: {det['dimensions']['x']:.1f} × "
-                           f"{det['dimensions']['y']:.1f} × {det['dimensions']['z']:.1f} mm\n")
+                    f.write(f"    Size: {det['dimensions']['x']/1000:.1f} × "
+                           f"{det['dimensions']['y']/1000:.1f} × {det['dimensions']['z']/1000:.1f} m\n")
                 elif det['shape'] == 'sphere':
-                    f.write(f"    Size: {det['dimensions']['r']:.1f} mm\n")
+                    f.write(f"    Size: {det['dimensions']['r']/1000:.1f} m\n")
 
             f.write("\nDetector positions (from config.sh):\n")
             f.write("=" * 50 + "\n")
@@ -767,10 +792,10 @@ class Voxelizer:
             for d in detector_voxels:
                 f.write(f"Detector {d['id']}:\n")
                 f.write(
-                    f"  Position (mm): "
-                    f"x={d['position_mm']['x']:.1f}, "
-                    f"y={d['position_mm']['y']:.1f}, "
-                    f"z={d['position_mm']['z']:.1f}\n"
+                    f"  Position (m): "
+                    f"x={d['position_mm']['x']/1000:.1f}, "
+                    f"y={d['position_mm']['y']/1000:.1f}, "
+                    f"z={d['position_mm']['z']/1000:.1f}\n"
                 )
                 f.write(
                     f"  Voxel index (i,j,k): {d['voxel_ijk']}\n"
@@ -830,43 +855,20 @@ def main():
     print("   4. All of the above")
     print("   5. Exit")
     
-    try:
-        choice = input("\nSelect option (1-5): ").strip()
-        
-        if choice in ['1', '4']:
-            print("\n📊 Creating 2D layout plot...")
-            parser.visualize_2d()
-        
-        if choice in ['2', '4']:
-            print("\n📊 Creating 3D geometry plot...")
-            parser.visualize_3d()
-        
-        if choice in ['3', '4']:
-            print("\n🛠️ Creating voxel grid...")
-            
-            # Create voxelizer
-            voxelizer = Voxelizer(parser, resolution=resolution)
-            
-            # Create voxel grid
-            voxel_grid, voxel_coords, bbox = voxelizer.create_voxel_grid()
-            
-            # Plot slices
-            voxelizer.plot_voxel_slices(voxel_grid)
-            
-            # Save results
-            prefix = os.path.splitext(os.path.basename(xml_file))[0]
-            voxelizer.save_results(voxel_grid, voxel_coords, bbox, prefix=prefix)
-        
-        if choice == '5':
-            print("\n👋 Goodbye!")
-            sys.exit(0)
-            
-    except KeyboardInterrupt:
-        print("\n\n👋 Interrupted by user")
-    except Exception as e:
-        print(f"\n❌ Error: {e}")
-        import traceback
-        traceback.print_exc()
+    print("\n🛠️ Creating voxel grid...")
+    
+    # Create voxelizer
+    voxelizer = Voxelizer(parser, resolution=resolution)
+    
+    # Create voxel grid
+    voxel_grid, voxel_coords, bbox = voxelizer.create_voxel_grid()
+    
+    # Plot slices
+    voxelizer.plot_voxel_slices(voxel_grid)
+    
+    # Save results
+    prefix = os.path.splitext(os.path.basename(xml_file))[0]
+    voxelizer.save_results(voxel_grid, voxel_coords, bbox, prefix=prefix)
 
 
 def quick_visualize(xml_file):
